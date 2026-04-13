@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOYAIGE — Life. Handled.</title>
+  <meta name="description" content="Your AI concierge for when plans change. Calm, clear, and always one step ahead.">
+  <meta property="og:title" content="VOYAIGE — Life. Handled.">
+  <meta property="og:description" content="Your AI concierge for when plans change.">
+  <meta property="og:type" content="website">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* =============================================
+       RESET & TOKENS
+    ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #0D1B2A;
+      --navy-mid:    #112030;
+      --navy-light:  #1a2e42;
+      --white:       #FFFFFF;
+      --gold:        #D8C69F;
+      --gold-hover:  #e8d9b8;
+      --gold-dim:    rgba(216,198,159,0.5);
+      --gold-subtle: rgba(216,198,159,0.12);
+      --white-dim:   rgba(255,255,255,0.5);
+      --white-faint: rgba(255,255,255,0.28);
+      --border:      rgba(255,255,255,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Subtle grid on all sections (static lines) ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+      background-size: 80px 80px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .display {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 48px; position: relative; z-index: 1; }
+
+    section { padding: 120px 0; position: relative; }
+
+    /* =============================================
+       NAV
+    ============================================= */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 28px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.5s, backdrop-filter 0.5s, padding 0.4s;
+    }
+
+    nav.scrolled {
+      padding: 16px 48px;
+      background: rgba(13,27,42,0.92);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+    .nav-wordmark { font-size: 13px; font-weight: 500; letter-spacing: 0.28em; color: var(--white); }
+
+    .nav-cta {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--navy); background: var(--gold);
+      padding: 11px 26px; text-decoration: none; display: inline-block;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .nav-cta:hover { background: var(--gold-hover); transform: translateY(-1px); }
+
+    /* =============================================
+       HERO
+    ============================================= */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated grid SVG — inserted by JS */
+    #hero-grid {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      /* Radial mask: visible at centre, fades to transparent at edges */
+      mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, white 10%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, white 10%, transparent 80%);
+    }
+
+    /* Radial gold glow behind hero content */
+    .hero-glow {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(216,198,159,0.045) 0%, transparent 65%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .hero-content { position: relative; z-index: 1; }
+
+    .hero-mark {
+      margin-bottom: 52px;
+      opacity: 0; transform: translateY(16px);
+      animation: fadeUp 1s ease 0.2s forwards;
+    }
+
+    .hero-eyebrow {
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.5s forwards;
+    }
+
+    .hero-headline { font-size: clamp(72px, 11vw, 128px); margin-bottom: 28px; }
+
+    .hero-headline .word { display: inline-block; }
+    .hero-headline .word + .word { margin-left: 0.22em; }
+    .hero-headline .letter {
+      display: inline-block;
+      opacity: 0; transform: translateY(60px);
+      animation: letterSpring 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 1.8vw, 19px); color: var(--white-dim);
+      max-width: 400px; margin: 0 auto 56px; line-height: 1.8; font-weight: 300;
+      opacity: 0; animation: fadeUp 1s ease 1.4s forwards;
+    }
+
+    .hero-cta-group {
+      display: flex; flex-direction: column; align-items: center; gap: 18px;
+      opacity: 0; animation: fadeUp 1s ease 1.6s forwards;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--gold); color: var(--navy);
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 18px 44px; text-decoration: none; border: none; cursor: pointer;
+      transition: background 0.25s, transform 0.25s;
+    }
+    .btn-primary:hover { background: var(--gold-hover); transform: translateY(-2px); }
+    .btn-primary:hover svg { transform: translateX(3px); }
+    .btn-primary svg { transition: transform 0.25s; }
+
+    .hero-note { font-size: 11px; color: var(--gold-dim); letter-spacing: 0.1em; }
+
+    .scroll-hint {
+      position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%);
+      opacity: 0; animation: fadeUp 1s ease 2s forwards; z-index: 1;
+    }
+    .scroll-hint-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--gold-dim), transparent);
+      animation: linePulse 2.4s ease-in-out infinite;
+    }
+
+    /* Grid square pulse — used by animated grid JS */
+    @keyframes gridSquarePulse {
+      0%, 100% { opacity: 0; }
+      50%       { opacity: 1; }
+    }
+
+    /* =============================================
+       HOW IT WORKS
+    ============================================= */
+    #how-it-works { border-top: 1px solid var(--border); }
+
+    .hiw-sticky {
+      position: sticky; top: 0; height: 100vh;
+      display: flex; align-items: center; overflow: hidden;
+    }
+
+    .hiw-inner {
+      width: 100%; display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px; align-items: center;
+    }
+
+    .hiw-header { margin-bottom: 48px; }
+    .hiw-headline { font-size: clamp(30px, 3.8vw, 48px); margin-top: 16px; }
+
+    .hiw-step {
+      padding: 26px 0; border-top: 1px solid var(--border);
+      cursor: default; opacity: 0.3; transition: opacity 0.5s ease;
+    }
+    .hiw-step:last-child { border-bottom: 1px solid var(--border); }
+    .hiw-step.active { opacity: 1; }
+
+    .step-top { display: flex; align-items: center; gap: 18px; margin-bottom: 10px; }
+
+    .step-num-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid var(--border); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: var(--white-faint);
+      transition: border-color 0.4s, color 0.4s, background 0.4s;
+    }
+    .hiw-step.active .step-num-badge { border-color: var(--gold); color: var(--navy); background: var(--gold); }
+
+    .step-heading { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; line-height: 1.2; }
+
+    .step-body { font-size: 14px; color: var(--white-dim); line-height: 1.8; padding-left: 52px; margin-bottom: 14px; }
+    .step-body strong { color: var(--white); font-weight: 500; }
+
+    .step-progress-track { margin-left: 52px; height: 1px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .step-progress-fill { height: 100%; width: 0%; background: var(--gold); }
+
+    /* Phone visual — right column */
+    .hiw-visual {
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+
+    .hiw-visual::before {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(216,198,159,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Fixed-height container — all phones same height */
+    .hiw-phone-wrap {
+      position: relative;
+      width: 280px;
+      height: 540px;    /* fixed: all phone images render at this height */
+      overflow: hidden; /* clips any extra-wide images by tiny amount */
+    }
+
+    .hiw-screen {
+      position: absolute; inset: 0;
+      display: flex; align-items: flex-start; justify-content: center;
+      opacity: 0;
+      transform: translateY(20px) scale(0.97);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .hiw-screen.active { opacity: 1; transform: translateY(0) scale(1); }
+
+    .hiw-screen img {
+      height: 100%;     /* fills container height — ensures all phones same size */
+      width: auto;
+      display: block;
+    }
+
+    /* =============================================
+       FEATURES
+    ============================================= */
+    #features { border-top: 1px solid var(--border); }
+    .features-header { text-align: center; margin-bottom: 72px; }
+    .features-headline { font-size: clamp(34px, 4.5vw, 56px); margin-top: 20px; }
+
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--border); gap: 1px; background: var(--border);
+    }
+    .feature-card { background: var(--navy); padding: 56px 40px; transition: background 0.35s; }
+    .feature-card:hover { background: var(--navy-mid); }
+
+    .feature-num { display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); margin-bottom: 32px; }
+    .feature-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; line-height: 1.2; margin-bottom: 18px; }
+    .feature-body { font-size: 14px; color: var(--white-dim); line-height: 1.85; }
+
+    /* =============================================
+       APP PREVIEW
+    ============================================= */
+    #preview { border-top: 1px solid var(--border); text-align: center; overflow: hidden; }
+    .preview-header { margin-bottom: 72px; }
+    .preview-headline { font-size: clamp(34px, 4.5vw, 56px); margin-top: 20px; }
+    .preview-sub { font-size: 16px; color: var(--white-dim); margin-top: 16px; }
+
+    .phones-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    /* Direct <img> display — drop-shadow follows the phone's natural shape */
+    .screen-img {
+      display: block;
+      transition: transform 0.4s ease, filter 0.4s ease;
+    }
+
+    .screen-img-main {
+      height: 560px;
+      width: auto;
+      filter: drop-shadow(0 40px 80px rgba(0,0,0,0.7)) drop-shadow(0 8px 24px rgba(0,0,0,0.4));
+    }
+
+    .screen-img-side {
+      height: 460px;
+      width: auto;
+      opacity: 0.6;
+      filter: drop-shadow(0 24px 56px rgba(0,0,0,0.5));
+    }
+
+    .screen-img:hover { transform: translateY(-8px); }
+    .screen-img-side:hover { opacity: 0.85; }
+
+    /* =============================================
+       WAITLIST
+    ============================================= */
+    #waitlist { border-top: 1px solid var(--border); text-align: center; }
+    .waitlist-inner { max-width: 600px; margin: 0 auto; }
+    .waitlist-headline { font-size: clamp(44px, 7vw, 80px); margin: 20px 0; }
+    .waitlist-sub { font-size: 16px; color: var(--white-dim); line-height: 1.8; margin-bottom: 56px; }
+
+    .waitlist-form { display: flex; max-width: 460px; margin: 0 auto 20px; }
+
+    .waitlist-input {
+      flex: 1; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(216,198,159,0.22); border-right: none;
+      color: var(--white); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 300; padding: 17px 24px; outline: none;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .waitlist-input::placeholder { color: rgba(255,255,255,0.28); letter-spacing: 0.05em; }
+    .waitlist-input:focus { border-color: var(--gold-dim); background: rgba(255,255,255,0.07); }
+
+    .waitlist-submit {
+      background: var(--gold); color: var(--navy); font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 17px 32px; border: none; cursor: pointer;
+      transition: background 0.2s; white-space: nowrap;
+    }
+    .waitlist-submit:hover { background: var(--gold-hover); }
+
+    .waitlist-note { font-size: 11px; color: var(--gold-dim); letter-spacing: 0.1em; }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    footer { border-top: 1px solid var(--border); padding: 48px 0; position: relative; z-index: 1; }
+
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+
+    .footer-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .footer-wordmark { font-size: 12px; font-weight: 500; letter-spacing: 0.28em; color: rgba(255,255,255,0.4); }
+
+    .footer-links { display: flex; align-items: center; gap: 32px; }
+    .footer-link { font-size: 12px; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
+    .footer-link:hover { color: var(--gold); }
+
+    .footer-copy { font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 0.08em; }
+
+    /* =============================================
+       ANIMATIONS
+    ============================================= */
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes letterSpring {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes linePulse {
+      0%, 100% { opacity: 0.35; }
+      50%       { opacity: 1; }
+    }
+
+    /* Scroll reveal */
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.85s ease, transform 0.85s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+    .reveal-d4 { transition-delay: 0.45s; }
+
+    /* =============================================
+       RESPONSIVE
+    ============================================= */
+    @media (max-width: 900px) {
+      nav { padding: 20px 24px; }
+      nav.scrolled { padding: 14px 24px; }
+      section { padding: 88px 0; }
+      .container { padding: 0 24px; }
+
+      .hiw-inner { grid-template-columns: 1fr; gap: 48px; }
+      .hiw-left { order: 2; }
+      .hiw-visual { order: 1; }
+      .hiw-phone-wrap { width: 240px; height: 460px; }
+
+      .features-grid { grid-template-columns: 1fr; }
+
+      .screen-img-side { display: none; }
+      .screen-img-main { height: 480px; }
+
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 560px) {
+      section { padding: 72px 0; }
+      .waitlist-form { flex-direction: column; }
+      .waitlist-input { border-right: 1px solid rgba(216,198,159,0.22); border-bottom: none; }
+      .waitlist-submit { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <nav id="nav">
+    <a href="#hero" class="nav-logo" aria-label="VOYAIGE home">
+      <img src="assets/logo-mark.png" alt="" aria-hidden="true" width="48" height="40" style="display:block;">
+      <span class="nav-wordmark">VOYAIGE</span>
+    </a>
+    <a href="#waitlist" class="nav-cta">Early Access</a>
+  </nav>
+
+
+  <!-- ===== HERO ===== -->
+  <section id="hero">
+    <!-- Animated grid populated by JS -->
+    <svg id="hero-grid" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="hero-glow" aria-hidden="true"></div>
+
+    <div class="hero-content">
+      <div class="hero-mark">
+        <img src="assets/logo-mark.png" alt="" aria-hidden="true" width="130" height="108" style="display:block; margin: 0 auto;">
+      </div>
+
+      <p class="eyebrow hero-eyebrow">Introducing VOYAIGE</p>
+
+      <h1 class="display hero-headline" id="heroHeadline">Life. Handled.</h1>
+
+      <p class="hero-sub">
+        Your AI concierge for when plans change.<br>
+        Calm, clear, and always one step ahead.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#waitlist" class="btn-primary">
+          Request Early Access
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <span class="hero-note">Limited spots &nbsp;·&nbsp; No spam &nbsp;·&nbsp; Unsubscribe anytime</span>
+      </div>
+    </div>
+
+    <div class="scroll-hint" aria-hidden="true">
+      <div class="scroll-hint-line"></div>
+    </div>
+  </section>
+
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section id="how-it-works">
+    <div class="hiw-sticky">
+      <div class="container">
+        <div class="hiw-inner">
+
+          <div class="hiw-left">
+            <div class="hiw-header">
+              <p class="eyebrow">The VOYAIGE process</p>
+              <h2 class="display hiw-headline">
+                When plans break,<br>we take over.
+              </h2>
+            </div>
+
+            <div id="hiwSteps">
+              <div class="hiw-step active" data-step="0">
+                <div class="step-top">
+                  <div class="step-num-badge">01</div>
+                  <h3 class="step-heading">Disruption Detected</h3>
+                </div>
+                <p class="step-body">
+                  VOYAIGE monitors your trip in real time. If a flight is cancelled,
+                  a hotel falls through, or weather changes your plans, it immediately
+                  finds the <strong>best alternative options</strong>.
+                </p>
+                <div class="step-progress-track"><div class="step-progress-fill" id="fill-0"></div></div>
+              </div>
+
+              <div class="hiw-step" data-step="1">
+                <div class="step-top">
+                  <div class="step-num-badge">02</div>
+                  <h3 class="step-heading">You Choose the Solution</h3>
+                </div>
+                <p class="step-body">
+                  VOYAIGE presents a few <strong>optimised options</strong> tailored to
+                  your preferences, schedule, and budget. You simply
+                  <strong>pick the one you want</strong>.
+                </p>
+                <div class="step-progress-track"><div class="step-progress-fill" id="fill-1"></div></div>
+              </div>
+
+              <div class="hiw-step" data-step="2">
+                <div class="step-top">
+                  <div class="step-num-badge">03</div>
+                  <h3 class="step-heading">VOYAIGE Executes Everything</h3>
+                </div>
+                <p class="step-body">
+                  Once you choose, VOYAIGE <strong>handles the rest</strong>. Flights rebooked,
+                  hotels confirmed, transport arranged, your itinerary updated automatically.
+                  You get one notification: <strong>"Your plans are updated."</strong>
+                </p>
+                <div class="step-progress-track"><div class="step-progress-fill" id="fill-2"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phone visual -->
+          <div class="hiw-visual">
+            <div class="hiw-phone-wrap" id="hiwPhones">
+              <div class="hiw-screen active" data-screen="0">
+                <img src="assets/screen-analysing.png" alt="VOYAIGE analysing your disruption" loading="lazy">
+              </div>
+              <div class="hiw-screen" data-screen="1">
+                <img src="assets/screen-options.png" alt="VOYAIGE presenting your options" loading="lazy">
+              </div>
+              <div class="hiw-screen" data-screen="2">
+                <img src="assets/screen-resolved.png" alt="VOYAIGE — resolved and handled" loading="lazy">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== FEATURES ===== -->
+  <section id="features">
+    <div class="container">
+      <div class="features-header">
+        <p class="eyebrow reveal">What you get</p>
+        <h2 class="display features-headline reveal reveal-d1">
+          Built for every<br>kind of disruption.
+        </h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <span class="feature-num">01</span>
+          <h3 class="feature-title">Real-time disruption<br>handling.</h3>
+          <p class="feature-body">Flight delayed? Hotel overbooked? VOYAIGE doesn't surface the problem and leave you to it. It presents a clear path forward before the panic has a chance to set in.</p>
+        </div>
+        <div class="feature-card reveal reveal-d1">
+          <span class="feature-num">02</span>
+          <h3 class="feature-title">Faster decisions,<br>less noise.</h3>
+          <p class="feature-body">No more tabs. No more second-guessing. Context-aware recommendations that understand your situation and give you exactly what you need to act — and move on.</p>
+        </div>
+        <div class="feature-card reveal reveal-d2">
+          <span class="feature-num">03</span>
+          <h3 class="feature-title">Same-day plans,<br>perfectly organised.</h3>
+          <p class="feature-body">From last-minute itineraries to complex multi-day trips, VOYAIGE organises everything with the calm clarity of someone who has done this a thousand times.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== APP PREVIEW ===== -->
+  <section id="preview">
+    <div class="container">
+      <div class="preview-header reveal">
+        <p class="eyebrow">The experience</p>
+        <h2 class="display preview-headline">Built for calm.<br>Designed for clarity.</h2>
+        <p class="preview-sub">A premium interface that feels as reassuring as it looks.</p>
+      </div>
+
+      <div class="phones-row">
+        <!-- Concierge — left -->
+        <img
+          src="assets/screen-concierge.png"
+          alt="VOYAIGE Concierge screen"
+          class="screen-img screen-img-side reveal reveal-d1"
+          loading="lazy"
+        >
+        <!-- Home — centre hero -->
+        <img
+          src="assets/screen-home.png"
+          alt="VOYAIGE Home screen"
+          class="screen-img screen-img-main reveal"
+          loading="lazy"
+        >
+        <!-- Preferences — right -->
+        <img
+          src="assets/screen-preferences.png"
+          alt="VOYAIGE Preferences screen"
+          class="screen-img screen-img-side reveal reveal-d2"
+          loading="lazy"
+        >
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== WAITLIST ===== -->
+  <section id="waitlist">
+    <div class="container">
+      <div class="waitlist-inner">
+        <p class="eyebrow reveal">Early access</p>
+        <h2 class="display waitlist-headline reveal reveal-d1">Be first.<br>Get early access.</h2>
+        <p class="waitlist-sub reveal reveal-d2">
+          VOYAIGE is launching soon. Join the waitlist and be among
+          the first to experience a calmer, clearer way to handle your world.
+        </p>
+        <form class="waitlist-form reveal reveal-d3" id="waitlistForm" novalidate>
+          <input type="email" class="waitlist-input" id="emailInput"
+            placeholder="Your email address" autocomplete="email" required>
+          <button type="submit" class="waitlist-submit" id="submitBtn">Join Waitlist</button>
+        </form>
+        <p class="waitlist-note reveal reveal-d4">No spam. No noise. Just VOYAIGE.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <a href="#hero" class="footer-logo" aria-label="Back to top">
+          <img src="assets/logo-mark.png" alt="" aria-hidden="true" width="40" height="33" style="display:block; opacity:0.5;">
+          <span class="footer-wordmark">VOYAIGE</span>
+        </a>
+        <div class="footer-links">
+          <a href="https://instagram.com/voyaige.app" class="footer-link" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="mailto:ryan@voyaige.app" class="footer-link">Contact</a>
+        </div>
+        <span class="footer-copy">&copy; 2025 VOYAIGE. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <script>
+  // ═══════════════════════════════════════════════
+  //  NAV
+  // ═══════════════════════════════════════════════
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 48);
+  }, { passive: true });
+
+  // ═══════════════════════════════════════════════
+  //  HERO: ANIMATED GRID PATTERN
+  //  Translated from AnimatedGridPattern React component
+  // ═══════════════════════════════════════════════
+  (function initAnimatedGrid() {
+    const ns         = 'http://www.w3.org/2000/svg';
+    const svg        = document.getElementById('hero-grid');
+    const hero       = document.getElementById('hero');
+    const CELL       = 40;
+    const NUM_SQ     = 50;
+    const MAX_OP     = 0.14;   // max opacity for lit squares
+    const DURATION   = [3, 5]; // random range in seconds
+
+    // Unique pattern ID (avoids conflicts if page has multiple SVGs)
+    const pid = 'gp-' + Math.random().toString(36).slice(2, 7);
+
+    // ── Grid line pattern ──────────────────────────
+    const defs    = document.createElementNS(ns, 'defs');
+    const pattern = document.createElementNS(ns, 'pattern');
+    pattern.id = pid;
+    pattern.setAttribute('width',  CELL);
+    pattern.setAttribute('height', CELL);
+    pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+    pattern.setAttribute('x', -1);
+    pattern.setAttribute('y', -1);
+
+    const linePath = document.createElementNS(ns, 'path');
+    linePath.setAttribute('d', `M.5 ${CELL}V.5H${CELL}`);
+    linePath.setAttribute('fill', 'none');
+    linePath.setAttribute('stroke', 'rgba(216,198,159,0.22)');
+    linePath.setAttribute('stroke-width', '0.6');
+    pattern.appendChild(linePath);
+    defs.appendChild(pattern);
+    svg.appendChild(defs);
+
+    // ── Grid background rect ───────────────────────
+    const bg = document.createElementNS(ns, 'rect');
+    bg.setAttribute('width',  '100%');
+    bg.setAttribute('height', '100%');
+    bg.setAttribute('fill',   `url(#${pid})`);
+    svg.appendChild(bg);
+
+    // ── Twinkling squares ──────────────────────────
+    const squaresG = document.createElementNS(ns, 'g');
+    squaresG.id = 'grid-squares-g';
+    svg.appendChild(squaresG);
+
+    function cols() { return Math.max(1, Math.floor(hero.offsetWidth  / CELL)); }
+    function rows() { return Math.max(1, Math.floor(hero.offsetHeight / CELL)); }
+
+    function randomPos() {
+      return [
+        Math.floor(Math.random() * cols()) * CELL + 1,
+        Math.floor(Math.random() * rows()) * CELL + 1,
+      ];
+    }
+
+    for (let i = 0; i < NUM_SQ; i++) {
+      const [x, y] = randomPos();
+      const rect   = document.createElementNS(ns, 'rect');
+      rect.setAttribute('width',  CELL - 1);
+      rect.setAttribute('height', CELL - 1);
+      rect.setAttribute('x', x);
+      rect.setAttribute('y', y);
+      rect.setAttribute('fill', `rgba(216,198,159,${MAX_OP})`);
+      rect.setAttribute('stroke-width', '0');
+
+      const dur   = (DURATION[0] + Math.random() * (DURATION[1] - DURATION[0])).toFixed(2);
+      const delay = (-(Math.random() * parseFloat(dur))).toFixed(2); // mid-flight start
+      rect.style.animation       = `gridSquarePulse ${dur}s ${delay}s infinite`;
+      rect.style.animationFillMode = 'none';
+
+      // Move to new random cell each time the animation loops
+      rect.addEventListener('animationiteration', () => {
+        const [nx, ny] = randomPos();
+        rect.setAttribute('x', nx);
+        rect.setAttribute('y', ny);
+      });
+
+      squaresG.appendChild(rect);
+    }
+  })();
+
+  // ═══════════════════════════════════════════════
+  //  HERO: LETTER-BY-LETTER HEADLINE
+  // ═══════════════════════════════════════════════
+  (function animateHeadline() {
+    const el    = document.getElementById('heroHeadline');
+    const words = el.textContent.trim().split(' ');
+    el.textContent = '';
+    let idx = 0;
+
+    words.forEach((word, wi) => {
+      const span = document.createElement('span');
+      span.className = 'word';
+      word.split('').forEach((ch) => {
+        const l = document.createElement('span');
+        l.className = 'letter';
+        l.textContent = ch;
+        l.style.animationDelay = (wi * 0.12 + idx * 0.035 + 0.8).toFixed(3) + 's';
+        span.appendChild(l);
+        idx++;
+      });
+      el.appendChild(span);
+      idx++; // space
+    });
+  })();
+
+  // ═══════════════════════════════════════════════
+  //  HOW IT WORKS — Scroll-driven
+  // ═══════════════════════════════════════════════
+  (function initScrollSteps() {
+    const STEPS           = 3;
+    const SCROLL_PER_STEP = 360;
+    const TOTAL           = STEPS * SCROLL_PER_STEP;
+
+    const section = document.getElementById('how-it-works');
+    const steps   = section.querySelectorAll('.hiw-step');
+    const screens = section.querySelectorAll('.hiw-screen');
+    const fills   = [
+      document.getElementById('fill-0'),
+      document.getElementById('fill-1'),
+      document.getElementById('fill-2'),
+    ];
+
+    section.style.height = `calc(100vh + ${TOTAL}px)`;
+
+    function update() {
+      const top      = section.getBoundingClientRect().top + window.scrollY;
+      const scrolled = Math.max(0, window.scrollY - top);
+      const progress = Math.min(scrolled / TOTAL, 1);
+      const stepF    = progress * STEPS;
+      const stepIdx  = Math.min(Math.floor(stepF), STEPS - 1);
+      const fillPct  = (stepF % 1) * 100;
+
+      steps.forEach((s, i)   => s.classList.toggle('active', i === stepIdx));
+      screens.forEach((s, i) => s.classList.toggle('active', i === stepIdx));
+
+      fills.forEach((f, i) => {
+        f.style.width = i < stepIdx ? '100%' : i === stepIdx ? fillPct.toFixed(1) + '%' : '0%';
+      });
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+
+  // ═══════════════════════════════════════════════
+  //  WAITLIST → MAILTO
+  // ═══════════════════════════════════════════════
+  document.getElementById('waitlistForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value.trim();
+    const btn   = document.getElementById('submitBtn');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+
+    const s = encodeURIComponent('VOYAIGE — Early Access Request');
+    const b = encodeURIComponent(`Hi,\n\nPlease add me to the VOYAIGE waitlist.\n\nEmail: ${email}\n\nThanks`);
+    window.location.href = `mailto:ryan@voyaige.app?subject=${s}&body=${b}`;
+
+    document.getElementById('emailInput').value = '';
+    btn.textContent = 'Request Sent ✓';
+    btn.style.background = '#b8a87e';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.style.background = ''; btn.disabled = false; }, 4000);
+  });
+
+  // ═══════════════════════════════════════════════
+  //  SCROLL REVEAL (shared observer)
+  // ═══════════════════════════════════════════════
+  (function() {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  })();
+  </script>
+
+</body>
+</html>
