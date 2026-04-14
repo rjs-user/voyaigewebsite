@@ -425,15 +425,25 @@
       section { padding: 88px 0; }
       .container { padding: 0 24px; }
 
-      .hiw-inner { grid-template-columns: 1fr; gap: 48px; }
+      /* Disable sticky scroll on mobile — normal flow instead */
+      #how-it-works { height: auto !important; }
+      .hiw-sticky { position: relative; height: auto; overflow: visible; }
+      .hiw-inner { grid-template-columns: 1fr; gap: 40px; }
       .hiw-left { order: 2; }
       .hiw-visual { order: 1; }
-      .hiw-phone-wrap { width: 240px; height: 460px; }
+      .hiw-visual::before { width: 260px; height: 260px; }
+      .hiw-phone-wrap { width: 200px; height: 400px; }
+
+      /* Only show the active step on mobile */
+      .hiw-step { display: none; }
+      .hiw-step.active { display: block; }
 
       .features-grid { grid-template-columns: 1fr 1fr; }
     }
 
     @media (max-width: 600px) {
+      .hiw-phone-wrap { width: 180px; height: 360px; }
+
       .features-grid { grid-template-columns: 1fr; }
 
       .screen-img-side { display: none; }
@@ -810,6 +820,8 @@
     const STEPS           = 3;
     const SCROLL_PER_STEP = 360;
     const TOTAL           = STEPS * SCROLL_PER_STEP;
+    const MOBILE_BP       = 900;
+    const AUTO_INTERVAL   = 4000; // ms per step on mobile
 
     const section = document.getElementById('how-it-works');
     const steps   = section.querySelectorAll('.hiw-step');
@@ -820,9 +832,22 @@
       document.getElementById('fill-2'),
     ];
 
-    section.style.height = `calc(100vh + ${TOTAL}px)`;
+    let autoTimer = null;
+    let mobileStep = 0;
 
-    function update() {
+    function isMobile() { return window.innerWidth <= MOBILE_BP; }
+
+    function setStep(idx) {
+      steps.forEach((s, i)   => s.classList.toggle('active', i === idx));
+      screens.forEach((s, i) => s.classList.toggle('active', i === idx));
+      fills.forEach((f, i) => {
+        f.style.width = i < idx ? '100%' : i === idx ? '100%' : '0%';
+      });
+    }
+
+    // Desktop: scroll-driven
+    function updateScroll() {
+      if (isMobile()) return;
       const top      = section.getBoundingClientRect().top + window.scrollY;
       const scrolled = Math.max(0, window.scrollY - top);
       const progress = Math.min(scrolled / TOTAL, 1);
@@ -832,14 +857,41 @@
 
       steps.forEach((s, i)   => s.classList.toggle('active', i === stepIdx));
       screens.forEach((s, i) => s.classList.toggle('active', i === stepIdx));
-
       fills.forEach((f, i) => {
         f.style.width = i < stepIdx ? '100%' : i === stepIdx ? fillPct.toFixed(1) + '%' : '0%';
       });
     }
 
-    window.addEventListener('scroll', update, { passive: true });
-    update();
+    // Mobile: auto-rotate steps
+    function startAutoRotate() {
+      stopAutoRotate();
+      autoTimer = setInterval(() => {
+        mobileStep = (mobileStep + 1) % STEPS;
+        setStep(mobileStep);
+      }, AUTO_INTERVAL);
+    }
+
+    function stopAutoRotate() {
+      if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+    }
+
+    function handleMode() {
+      if (isMobile()) {
+        section.style.height = '';
+        stopAutoRotate();
+        mobileStep = 0;
+        setStep(0);
+        startAutoRotate();
+      } else {
+        stopAutoRotate();
+        section.style.height = `calc(100vh + ${TOTAL}px)`;
+        updateScroll();
+      }
+    }
+
+    window.addEventListener('scroll', updateScroll, { passive: true });
+    window.addEventListener('resize', handleMode);
+    handleMode();
   })();
 
   // ═══════════════════════════════════════════════
