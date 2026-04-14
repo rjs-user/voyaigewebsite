@@ -844,9 +844,47 @@
 
   // ═══════════════════════════════════════════════
   //  WAITLIST → LOOPS.SO
+  //  Primary: fetch API. Fallback: hidden form POST
+  //  (Safari ITP can block cross-origin fetch to
+  //  newsletter domains, but allows standard form posts)
   // ═══════════════════════════════════════════════
   const LOOPS_FORM_ID = 'cmnwkk5n117180i1v09d8im8f';
   const LOOPS_ENDPOINT = `https://app.loops.so/api/newsletter-form/${LOOPS_FORM_ID}`;
+
+  function showSuccess(btn) {
+    document.getElementById('emailInput').value = '';
+    btn.textContent = 'You\'re on the list';
+    btn.style.background = '#b8a87e';
+    setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.style.background = ''; btn.disabled = false; }, 4000);
+  }
+
+  function submitViaIframe(email, btn) {
+    var iframe = document.createElement('iframe');
+    iframe.name = 'loops-iframe';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = LOOPS_ENDPOINT;
+    form.target = 'loops-iframe';
+
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'email';
+    input.value = email;
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    form.submit();
+
+    showSuccess(btn);
+
+    setTimeout(function() {
+      document.body.removeChild(form);
+      document.body.removeChild(iframe);
+    }, 5000);
+  }
 
   document.getElementById('waitlistForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -865,19 +903,12 @@
       });
 
       if (res.ok) {
-        document.getElementById('emailInput').value = '';
-        btn.textContent = 'You\'re on the list';
-        btn.style.background = '#b8a87e';
-        setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.style.background = ''; btn.disabled = false; }, 4000);
+        showSuccess(btn);
       } else {
-        const data = await res.json().catch(() => null);
-        btn.textContent = (data && data.message) || 'Something went wrong';
-        btn.style.background = '';
-        setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.disabled = false; }, 3000);
+        submitViaIframe(email, btn);
       }
     } catch {
-      btn.textContent = 'Connection error';
-      setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.style.background = ''; btn.disabled = false; }, 3000);
+      submitViaIframe(email, btn);
     }
   });
 
