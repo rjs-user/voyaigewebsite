@@ -301,7 +301,7 @@
     .features-headline { font-size: clamp(34px, 4.5vw, 56px); margin-top: 20px; }
 
     .features-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr);
+      display: grid; grid-template-columns: repeat(2, 1fr);
       border: 1px solid var(--border); gap: 1px; background: var(--border);
     }
     .feature-card { background: var(--navy); padding: 56px 40px; transition: background 0.35s; }
@@ -430,6 +430,10 @@
       .hiw-visual { order: 1; }
       .hiw-phone-wrap { width: 240px; height: 460px; }
 
+      .features-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 600px) {
       .features-grid { grid-template-columns: 1fr; }
 
       .screen-img-side { display: none; }
@@ -576,26 +580,31 @@
   <section id="features">
     <div class="container">
       <div class="features-header">
-        <p class="eyebrow reveal">What you get</p>
+        <p class="eyebrow reveal">The four pillars</p>
         <h2 class="display features-headline reveal reveal-d1">
-          Built for every<br>kind of disruption.
+          One concierge.<br>Every situation.
         </h2>
       </div>
       <div class="features-grid">
         <div class="feature-card reveal">
-          <span class="feature-num">01</span>
-          <h3 class="feature-title">Real-time disruption<br>handling.</h3>
-          <p class="feature-body">Flight delayed? Hotel overbooked? VOYAIGE doesn't surface the problem and leave you to it. It presents a clear path forward before the panic has a chance to set in.</p>
+          <span class="feature-num">Find</span>
+          <h3 class="feature-title">Curated, not searched.</h3>
+          <p class="feature-body">VOYAIGE knows your taste. It returns one recommendation — the right one — for flights, hotels, restaurants, and activities. No endless scrolling. No comparing tabs.</p>
         </div>
         <div class="feature-card reveal reveal-d1">
-          <span class="feature-num">02</span>
-          <h3 class="feature-title">Faster decisions,<br>less noise.</h3>
-          <p class="feature-body">No more tabs. No more second-guessing. Context-aware recommendations that understand your situation and give you exactly what you need to act — and move on.</p>
+          <span class="feature-num">Fix</span>
+          <h3 class="feature-title">Disruptions, handled.</h3>
+          <p class="feature-body">Flight cancelled. Hotel overbooked. Plans changed. VOYAIGE takes ownership, presents clear options, and resolves it — so you never sit on hold again.</p>
         </div>
         <div class="feature-card reveal reveal-d2">
-          <span class="feature-num">03</span>
-          <h3 class="feature-title">Same-day plans,<br>perfectly organised.</h3>
-          <p class="feature-body">From last-minute itineraries to complex multi-day trips, VOYAIGE organises everything with the calm clarity of someone who has done this a thousand times.</p>
+          <span class="feature-num">Protect</span>
+          <h3 class="feature-title">Aware before you arrive.</h3>
+          <p class="feature-body">Location-specific safety intelligence delivered before and during your trip. Neighbourhood awareness, local customs, transport tips — confident and direct.</p>
+        </div>
+        <div class="feature-card reveal reveal-d3">
+          <span class="feature-num">Inform</span>
+          <h3 class="feature-title">One step ahead of your day.</h3>
+          <p class="feature-body">Your bus is late — take the train instead. Weather's turning — here's a better plan. VOYAIGE reads your schedule and acts before you need to ask.</p>
         </div>
       </div>
     </div>
@@ -834,23 +843,42 @@
   })();
 
   // ═══════════════════════════════════════════════
-  //  WAITLIST → MAILTO
+  //  WAITLIST → LOOPS.SO
   // ═══════════════════════════════════════════════
-  document.getElementById('waitlistForm').addEventListener('submit', function(e) {
+  const LOOPS_FORM_ID = 'cmnwkk5n117180i1v09d8im8f';
+  const LOOPS_ENDPOINT = `https://app.loops.so/api/newsletter-form/${LOOPS_FORM_ID}`;
+
+  document.getElementById('waitlistForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const email = document.getElementById('emailInput').value.trim();
     const btn   = document.getElementById('submitBtn');
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
 
-    const s = encodeURIComponent('VOYAIGE — Early Access Request');
-    const b = encodeURIComponent(`Hi,\n\nPlease add me to the VOYAIGE waitlist.\n\nEmail: ${email}\n\nThanks`);
-    window.location.href = `mailto:ryan@voyaige.app?subject=${s}&body=${b}`;
-
-    document.getElementById('emailInput').value = '';
-    btn.textContent = 'Request Sent ✓';
-    btn.style.background = '#b8a87e';
+    btn.textContent = 'Sending...';
     btn.disabled = true;
-    setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.style.background = ''; btn.disabled = false; }, 4000);
+
+    try {
+      const res = await fetch(LOOPS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (res.ok) {
+        document.getElementById('emailInput').value = '';
+        btn.textContent = 'You\'re on the list';
+        btn.style.background = '#b8a87e';
+        setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.style.background = ''; btn.disabled = false; }, 4000);
+      } else {
+        const data = await res.json().catch(() => null);
+        btn.textContent = (data && data.message) || 'Something went wrong';
+        btn.style.background = '';
+        setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.disabled = false; }, 3000);
+      }
+    } catch {
+      btn.textContent = 'Connection error';
+      setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.style.background = ''; btn.disabled = false; }, 3000);
+    }
   });
 
   // ═══════════════════════════════════════════════
