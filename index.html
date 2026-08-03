@@ -26,6 +26,8 @@
       --white:       #FFFFFF;
       --gold:        #D8C69F;
       --gold-hover:  #e8d9b8;
+      --gold-deep:   #b8a87e;
+      --pill-red:    #c47c7c;
       --gold-dim:    rgba(216,198,159,0.5);
       --gold-subtle: rgba(216,198,159,0.12);
       --white-dim:   rgba(255,255,255,0.5);
@@ -375,6 +377,16 @@
       transition: background 0.2s; white-space: nowrap;
     }
     .waitlist-submit:hover { background: var(--gold-hover); }
+    .waitlist-submit:disabled { cursor: default; }
+    .waitlist-submit.is-sent { background: var(--gold-deep); }
+
+    /* Reserves its own height so the layout doesn't jump when a result lands. */
+    .waitlist-status {
+      max-width: 460px; margin: 0 auto 16px; min-height: 20px;
+      font-size: 13px; line-height: 1.6;
+    }
+    .waitlist-status.is-error   { color: var(--pill-red); }
+    .waitlist-status.is-success { color: var(--gold); }
 
     .waitlist-note { font-size: 11px; color: var(--gold-dim); letter-spacing: 0.1em; }
 
@@ -672,6 +684,7 @@
             placeholder="Your email address" autocomplete="email" required>
           <button type="submit" class="waitlist-submit" id="submitBtn">Join Waitlist</button>
         </form>
+        <p class="waitlist-status" id="waitlistStatus" role="status" aria-live="polite"></p>
         <p class="waitlist-note reveal reveal-d4">No spam. No noise. Just VOYAIGE.</p>
       </div>
     </div>
@@ -896,73 +909,92 @@
 
   // ═══════════════════════════════════════════════
   //  WAITLIST → LOOPS.SO
-  //  Primary: fetch API. Fallback: hidden form POST
-  //  (Safari ITP can block cross-origin fetch to
-  //  newsletter domains, but allows standard form posts)
+  //  Loops replies with `access-control-allow-origin: *`,
+  //  so the browser can read the real response. Every
+  //  outcome below is reported from that response — we
+  //  never claim a signup we haven't seen confirmed.
   // ═══════════════════════════════════════════════
-  const LOOPS_FORM_ID = 'cmnwkk5n117180i1v09d8im8f';
-  const LOOPS_ENDPOINT = `https://app.loops.so/api/newsletter-form/${LOOPS_FORM_ID}`;
+  (function() {
+    const LOOPS_FORM_ID  = 'cmnwkk5n117180i1v09d8im8f';
+    const LOOPS_ENDPOINT = `https://app.loops.so/api/newsletter-form/${LOOPS_FORM_ID}`;
+    const CONTACT_EMAIL  = 'ryan@voyaige.app';
+    const EMAIL_PATTERN  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const RESET_DELAY_MS = 4000;
 
-  function showSuccess(btn) {
-    document.getElementById('emailInput').value = '';
-    btn.textContent = 'You\'re on the list';
-    btn.style.background = '#b8a87e';
-    setTimeout(() => { btn.textContent = 'Join Waitlist'; btn.style.background = ''; btn.disabled = false; }, 4000);
-  }
+    const form   = document.getElementById('waitlistForm');
+    const input  = document.getElementById('emailInput');
+    const btn    = document.getElementById('submitBtn');
+    const status = document.getElementById('waitlistStatus');
 
-  function submitViaIframe(email, btn) {
-    var iframe = document.createElement('iframe');
-    iframe.name = 'loops-iframe';
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = LOOPS_ENDPOINT;
-    form.target = 'loops-iframe';
-
-    var input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'email';
-    input.value = email;
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
-
-    showSuccess(btn);
-
-    setTimeout(function() {
-      document.body.removeChild(form);
-      document.body.removeChild(iframe);
-    }, 5000);
-  }
-
-  document.getElementById('waitlistForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const email = document.getElementById('emailInput').value.trim();
-    const btn   = document.getElementById('submitBtn');
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
-
-    btn.textContent = 'Sending...';
-    btn.disabled = true;
-
-    try {
-      const res = await fetch(LOOPS_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (res.ok) {
-        showSuccess(btn);
-      } else {
-        submitViaIframe(email, btn);
-      }
-    } catch {
-      submitViaIframe(email, btn);
+    function setStatus(message, kind) {
+      status.textContent = message;
+      status.className = kind ? `waitlist-status is-${kind}` : 'waitlist-status';
     }
-  });
+
+    function resetButton() {
+      btn.textContent = 'Join Waitlist';
+      btn.classList.remove('is-sent');
+      btn.disabled = false;
+    }
+
+    // Loops answers with JSON, but Cloudflare's rate limiter answers with
+    // plain text ("error code: 1015") — so never assume the body parses.
+    async function readBody(res) {
+      try { return JSON.parse(await res.text()); } catch { return null; }
+    }
+
+    function failureMessage(res, body) {
+      if (body && body.message) return body.message;
+      if (res.status === 429) return 'Too many attempts just now. Wait a moment, then try again.';
+      return `Something went wrong (error ${res.status}) and you are not on the list. `
+           + `Please try again, or email ${CONTACT_EMAIL}.`;
+    }
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = input.value.trim();
+
+      if (!EMAIL_PATTERN.test(email)) {
+        setStatus('Enter a valid email address.', 'error');
+        input.focus();
+        return;
+      }
+
+      setStatus('', null);
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+
+      let res;
+      try {
+        res = await fetch(LOOPS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+      } catch {
+        // Offline, or the request never left the browser (blocker/extension).
+        setStatus(`We couldn't reach the server, so you are not on the list yet. `
+                + `Check your connection and try again, or email ${CONTACT_EMAIL}.`, 'error');
+        resetButton();
+        return;
+      }
+
+      const body = await readBody(res);
+      const isAccepted = res.ok && (!body || body.success !== false);
+
+      if (!isAccepted) {
+        setStatus(failureMessage(res, body), 'error');
+        resetButton();
+        return;
+      }
+
+      input.value = '';
+      setStatus('You\'re on the list. Watch your inbox.', 'success');
+      btn.textContent = 'You\'re on the list';
+      btn.classList.add('is-sent');
+      setTimeout(resetButton, RESET_DELAY_MS);
+    });
+  })();
 
   // ═══════════════════════════════════════════════
   //  SCROLL REVEAL (shared observer)
