@@ -966,10 +966,21 @@
 
       let res;
       try {
+        // Form-encoded, NOT JSON — and the Content-Type is deliberately left
+        // for fetch to set. `application/x-www-form-urlencoded` is a
+        // CORS-safelisted content type, so this goes as a "simple request" and
+        // the browser sends it straight through.
+        //
+        // `application/json` is NOT safelisted: it forces a CORS preflight, and
+        // Loops answers OPTIONS with 405 `Method Not Allowed` (allow: POST). A
+        // preflight must return 2xx, so the browser blocked the POST, fetch
+        // rejected, and EVERY visitor got "we couldn't reach the server" with
+        // nothing recorded. Broken 2026-06-20 to 2026-08-29, found from a real
+        // report — invisible to curl, which does not enforce CORS.
+        // Do not add a Content-Type header here.
         res = await fetch(LOOPS_ENDPOINT, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
+          body: new URLSearchParams({ email }),
         });
       } catch {
         // Offline, or the request never left the browser (blocker/extension).
