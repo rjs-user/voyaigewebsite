@@ -3,1020 +3,388 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VOYAIGE — Life. Handled.</title>
-  <meta name="description" content="Your AI concierge for when plans change. Calm, clear, and always one step ahead.">
-  <meta property="og:title" content="VOYAIGE — Life. Handled.">
-  <meta property="og:description" content="Your AI concierge for when plans change.">
-  <meta property="og:type" content="website">
 
+  <!--
+    Rewritten 2026-09-07 to .notes/reference/VOYAIGE_CONTENT_CANON_202608.md
+    and the six functions in VOYAIGE/CLAUDE.md.
+
+    WHAT WAS HERE BEFORE, so nobody restores it by accident: the hero read
+    "Your AI concierge for when plans change" — the retired one-liner, named in
+    canon §9 for leading with a category noun that drags travel behind it. The
+    features section led with "The four pillars" (Find / Fix / Protect /
+    Inform), which VOYAIGE/CLAUDE.md explicitly stopped being the frame on
+    2026-08-26. And the whole "how it works" section was a flight-cancellation
+    story, on a page for a product whose defining trait is that its user is
+    chronically over-capacity, not that they travel.
+
+    THE FIVE CHECKS anything on this page has to pass (canon §13):
+      1. leads with the posture, never a category noun
+      2. every claim inside its gate — nothing here claims execution as
+         shipped, and no dollar figure appears anywhere, because the value
+         ledger's gate (§8) is that no dollar figure goes public before the
+         ledger has produced one
+      3. the unit is consequence, never hours returned
+      4. right register for the audience — this is a parent-facing page, so no
+         strategy vocabulary and no competitor names
+      5. nothing from the never-say list: no "concierge", no "AI-powered", no
+         "assistant", no "always on", no emojis, no plane or boarding-pass
+         motifs, no "voyage" wordplay
+  -->
+
+  <title>VOYAIGE — It doesn&rsquo;t wait to be asked.</title>
+  <meta name="description" content="VOYAIGE runs your life in the background — catching what you'd miss, and handling what it can before you've noticed it needs handling.">
+
+  <meta property="og:title" content="VOYAIGE — It doesn&rsquo;t wait to be asked.">
+  <meta property="og:description" content="VOYAIGE runs your life in the background — catching what you'd miss, and handling what it can before you've noticed it needs handling.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://voyaige.app/">
+  <meta property="og:image" content="https://voyaige.app/assets/logo-mark.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" content="#EDECE6">
+  <link rel="canonical" href="https://voyaige.app/">
+  <link rel="icon" href="assets/logo-mark.png">
+
+  <!-- The app's own three faces: Bricolage Grotesque (display), Hanken
+       Grotesk (interface), IBM Plex Mono (data). Same files the iOS app
+       bundles, so the site and the product are set in one voice. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-
-  <style>
-    /* =============================================
-       RESET & TOKENS
-    ============================================= */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --navy:        #0D1B2A;
-      --navy-mid:    #112030;
-      --navy-light:  #1a2e42;
-      --white:       #FFFFFF;
-      --gold:        #D8C69F;
-      --gold-hover:  #e8d9b8;
-      --gold-deep:   #b8a87e;
-      --pill-red:    #c47c7c;
-      --gold-dim:    rgba(216,198,159,0.5);
-      --gold-subtle: rgba(216,198,159,0.12);
-      --white-dim:   rgba(255,255,255,0.5);
-      --white-faint: rgba(255,255,255,0.28);
-      --border:      rgba(255,255,255,0.08);
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--navy);
-      color: var(--white);
-      font-family: 'Inter', sans-serif;
-      font-weight: 300;
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    /* ── Subtle grid on all sections (static lines) ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
-      background-size: 80px 80px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .display {
-      font-family: 'Cormorant Garamond', serif;
-      font-weight: 300;
-      line-height: 1.08;
-      letter-spacing: -0.02em;
-    }
-
-    .eyebrow {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--gold);
-    }
-
-    .container { max-width: 1080px; margin: 0 auto; padding: 0 48px; position: relative; z-index: 1; }
-
-    section { padding: 120px 0; position: relative; }
-
-    /* =============================================
-       NAV
-    ============================================= */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      padding: 28px 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: background 0.5s, backdrop-filter 0.5s, padding 0.4s;
-    }
-
-    nav.scrolled {
-      padding: 16px 48px;
-      background: rgba(13,27,42,0.92);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-logo { display: flex; align-items: center; gap: 14px; text-decoration: none; }
-    .nav-wordmark { font-size: 13px; font-weight: 500; letter-spacing: 0.28em; color: var(--white); }
-
-    .nav-cta {
-      font-size: 11px; font-weight: 500; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--navy); background: var(--gold);
-      padding: 11px 26px; text-decoration: none; display: inline-block;
-      transition: background 0.2s, transform 0.2s;
-    }
-    .nav-cta:hover { background: var(--gold-hover); transform: translateY(-1px); }
-
-    /* =============================================
-       HERO
-    ============================================= */
-    #hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 0 32px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Animated grid SVG — inserted by JS */
-    #hero-grid {
-      position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      /* Radial mask: visible at centre, fades to transparent at edges */
-      mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, white 10%, transparent 80%);
-      -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, white 10%, transparent 80%);
-    }
-
-    /* Radial gold glow behind hero content */
-    .hero-glow {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(216,198,159,0.045) 0%, transparent 65%);
-      pointer-events: none; z-index: 0;
-    }
-
-    .hero-content { position: relative; z-index: 1; }
-
-    .hero-mark {
-      margin-bottom: 52px;
-      opacity: 0; transform: translateY(16px);
-      animation: fadeUp 1s ease 0.2s forwards;
-    }
-
-    .hero-eyebrow {
-      margin-bottom: 28px;
-      opacity: 0;
-      animation: fadeUp 1s ease 0.5s forwards;
-    }
-
-    .hero-headline { font-size: clamp(72px, 11vw, 128px); margin-bottom: 28px; }
-
-    .hero-headline .word { display: inline-block; }
-    .hero-headline .word + .word { margin-left: 0.22em; }
-    .hero-headline .letter {
-      display: inline-block;
-      opacity: 0; transform: translateY(60px);
-      animation: letterSpring 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-
-    .hero-sub {
-      font-size: clamp(16px, 1.8vw, 19px); color: var(--white-dim);
-      max-width: 400px; margin: 0 auto 56px; line-height: 1.8; font-weight: 300;
-      opacity: 0; animation: fadeUp 1s ease 1.4s forwards;
-    }
-
-    .hero-cta-group {
-      display: flex; flex-direction: column; align-items: center; gap: 18px;
-      opacity: 0; animation: fadeUp 1s ease 1.6s forwards;
-    }
-
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 10px;
-      background: var(--gold); color: var(--navy);
-      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
-      letter-spacing: 0.18em; text-transform: uppercase;
-      padding: 18px 44px; text-decoration: none; border: none; cursor: pointer;
-      transition: background 0.25s, transform 0.25s;
-    }
-    .btn-primary:hover { background: var(--gold-hover); transform: translateY(-2px); }
-    .btn-primary:hover svg { transform: translateX(3px); }
-    .btn-primary svg { transition: transform 0.25s; }
-
-    .hero-note { font-size: 11px; color: var(--gold-dim); letter-spacing: 0.1em; }
-
-    .scroll-hint {
-      position: absolute; bottom: 52px; left: 50%; transform: translateX(-50%);
-      opacity: 0; animation: fadeUp 1s ease 2s forwards; z-index: 1;
-    }
-    .scroll-hint-line {
-      width: 1px; height: 48px;
-      background: linear-gradient(to bottom, var(--gold-dim), transparent);
-      animation: linePulse 2.4s ease-in-out infinite;
-    }
-
-    /* Grid square pulse — used by animated grid JS */
-    @keyframes gridSquarePulse {
-      0%, 100% { opacity: 0; }
-      50%       { opacity: 1; }
-    }
-
-    /* =============================================
-       HOW IT WORKS
-    ============================================= */
-    #how-it-works { border-top: 1px solid var(--border); }
-
-    .hiw-sticky {
-      position: sticky; top: 0; height: 100vh;
-      display: flex; align-items: center; overflow: hidden;
-    }
-
-    .hiw-inner {
-      width: 100%; display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px; align-items: center;
-    }
-
-    .hiw-header { margin-bottom: 48px; }
-    .hiw-headline { font-size: clamp(30px, 3.8vw, 48px); margin-top: 16px; }
-
-    .hiw-step {
-      padding: 26px 0; border-top: 1px solid var(--border);
-      cursor: default; opacity: 0.3; transition: opacity 0.5s ease;
-    }
-    .hiw-step:last-child { border-bottom: 1px solid var(--border); }
-    .hiw-step.active { opacity: 1; }
-
-    .step-top { display: flex; align-items: center; gap: 18px; margin-bottom: 10px; }
-
-    .step-num-badge {
-      width: 34px; height: 34px; border-radius: 50%;
-      border: 1px solid var(--border); flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 500; letter-spacing: 0.08em; color: var(--white-faint);
-      transition: border-color 0.4s, color 0.4s, background 0.4s;
-    }
-    .hiw-step.active .step-num-badge { border-color: var(--gold); color: var(--navy); background: var(--gold); }
-
-    .step-heading { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; line-height: 1.2; }
-
-    .step-body { font-size: 14px; color: var(--white-dim); line-height: 1.8; padding-left: 52px; margin-bottom: 14px; }
-    .step-body strong { color: var(--white); font-weight: 500; }
-
-    .step-progress-track { margin-left: 52px; height: 1px; background: rgba(255,255,255,0.06); overflow: hidden; }
-    .step-progress-fill { height: 100%; width: 0%; background: var(--gold); }
-
-    /* Phone visual — right column */
-    .hiw-visual {
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-    }
-
-    .hiw-visual::before {
-      content: ''; position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%,-50%);
-      width: 360px; height: 360px;
-      background: radial-gradient(circle, rgba(216,198,159,0.06) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    /* Fixed-height container — all phones same height */
-    .hiw-phone-wrap {
-      position: relative;
-      width: 280px;
-      height: 540px;    /* fixed: all phone images render at this height */
-      overflow: hidden; /* clips any extra-wide images by tiny amount */
-    }
-
-    .hiw-screen {
-      position: absolute; inset: 0;
-      display: flex; align-items: flex-start; justify-content: center;
-      opacity: 0;
-      transform: translateY(20px) scale(0.97);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    .hiw-screen.active { opacity: 1; transform: translateY(0) scale(1); }
-
-    .hiw-screen img {
-      height: 100%;     /* fills container height — ensures all phones same size */
-      width: auto;
-      display: block;
-    }
-
-    /* =============================================
-       FEATURES
-    ============================================= */
-    #features { border-top: 1px solid var(--border); }
-    .features-header { text-align: center; margin-bottom: 72px; }
-    .features-headline { font-size: clamp(34px, 4.5vw, 56px); margin-top: 20px; }
-
-    .features-grid {
-      display: grid; grid-template-columns: repeat(2, 1fr);
-      border: 1px solid var(--border); gap: 1px; background: var(--border);
-    }
-    .feature-card { background: var(--navy); padding: 56px 40px; transition: background 0.35s; }
-    .feature-card:hover { background: var(--navy-mid); }
-
-    .feature-num { display: block; font-size: 10px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--gold); margin-bottom: 32px; }
-    .feature-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; line-height: 1.2; margin-bottom: 18px; }
-    .feature-body { font-size: 14px; color: var(--white-dim); line-height: 1.85; }
-
-    /* =============================================
-       APP PREVIEW
-    ============================================= */
-    #preview { border-top: 1px solid var(--border); text-align: center; overflow: hidden; }
-    .preview-header { margin-bottom: 72px; }
-    .preview-headline { font-size: clamp(34px, 4.5vw, 56px); margin-top: 20px; }
-    .preview-sub { font-size: 16px; color: var(--white-dim); margin-top: 16px; }
-
-    .phones-row {
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    /* Direct <img> display — drop-shadow follows the phone's natural shape */
-    .screen-img {
-      display: block;
-      transition: transform 0.4s ease, filter 0.4s ease;
-    }
-
-    .screen-img-main {
-      height: 560px;
-      width: auto;
-      filter: drop-shadow(0 40px 80px rgba(0,0,0,0.7)) drop-shadow(0 8px 24px rgba(0,0,0,0.4));
-    }
-
-    .screen-img-side {
-      height: 460px;
-      width: auto;
-      opacity: 0.6;
-      filter: drop-shadow(0 24px 56px rgba(0,0,0,0.5));
-    }
-
-    .screen-img:hover { transform: translateY(-8px); }
-    .screen-img-side:hover { opacity: 0.85; }
-
-    /* =============================================
-       WAITLIST
-    ============================================= */
-    #waitlist { border-top: 1px solid var(--border); text-align: center; }
-    .waitlist-inner { max-width: 600px; margin: 0 auto; }
-    .waitlist-headline { font-size: clamp(44px, 7vw, 80px); margin: 20px 0; }
-    .waitlist-sub { font-size: 16px; color: var(--white-dim); line-height: 1.8; margin-bottom: 56px; }
-
-    .waitlist-form { display: flex; max-width: 460px; margin: 0 auto 20px; }
-
-    .waitlist-input {
-      flex: 1; background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(216,198,159,0.22); border-right: none;
-      color: var(--white); font-family: 'Inter', sans-serif;
-      font-size: 14px; font-weight: 300; padding: 17px 24px; outline: none;
-      transition: border-color 0.25s, background 0.25s;
-    }
-    .waitlist-input::placeholder { color: rgba(255,255,255,0.28); letter-spacing: 0.05em; }
-    .waitlist-input:focus { border-color: var(--gold-dim); background: rgba(255,255,255,0.07); }
-
-    .waitlist-submit {
-      background: var(--gold); color: var(--navy); font-family: 'Inter', sans-serif;
-      font-size: 11px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
-      padding: 17px 32px; border: none; cursor: pointer;
-      transition: background 0.2s; white-space: nowrap;
-    }
-    .waitlist-submit:hover { background: var(--gold-hover); }
-    .waitlist-submit:disabled { cursor: default; }
-    .waitlist-submit.is-sent { background: var(--gold-deep); }
-
-    /* Reserves its own height so the layout doesn't jump when a result lands. */
-    .waitlist-status {
-      max-width: 460px; margin: 0 auto 16px; min-height: 20px;
-      font-size: 13px; line-height: 1.6;
-    }
-    .waitlist-status.is-error   { color: var(--pill-red); }
-    .waitlist-status.is-success { color: var(--gold); }
-
-    .waitlist-note { font-size: 11px; color: var(--gold-dim); letter-spacing: 0.1em; }
-
-    /* =============================================
-       FOOTER
-    ============================================= */
-    footer { border-top: 1px solid var(--border); padding: 48px 0; position: relative; z-index: 1; }
-
-    .footer-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
-
-    .footer-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-    .footer-wordmark { font-size: 12px; font-weight: 500; letter-spacing: 0.28em; color: rgba(255,255,255,0.4); }
-
-    .footer-links { display: flex; align-items: center; gap: 32px; }
-    .footer-link { font-size: 12px; letter-spacing: 0.1em; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
-    .footer-link:hover { color: var(--gold); }
-
-    .footer-copy { font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 0.08em; }
-
-    /* =============================================
-       ANIMATIONS
-    ============================================= */
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes letterSpring {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes linePulse {
-      0%, 100% { opacity: 0.35; }
-      50%       { opacity: 1; }
-    }
-
-    /* Scroll reveal */
-    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.85s ease, transform 0.85s ease; }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-d1 { transition-delay: 0.1s; }
-    .reveal-d2 { transition-delay: 0.2s; }
-    .reveal-d3 { transition-delay: 0.3s; }
-    .reveal-d4 { transition-delay: 0.45s; }
-
-    /* =============================================
-       RESPONSIVE
-    ============================================= */
-    @media (max-width: 900px) {
-      nav { padding: 20px 24px; }
-      nav.scrolled { padding: 14px 24px; }
-      section { padding: 88px 0; }
-      .container { padding: 0 24px; }
-
-      /* Disable sticky scroll on mobile — normal flow instead */
-      #how-it-works { height: auto !important; }
-      .hiw-sticky { position: relative; height: auto; overflow: visible; }
-      .hiw-inner { grid-template-columns: 1fr; gap: 40px; }
-      .hiw-left { order: 2; }
-      .hiw-visual { order: 1; }
-      .hiw-visual::before { width: 260px; height: 260px; }
-      .hiw-phone-wrap { width: 200px; height: 400px; }
-
-      /* Only show the active step on mobile */
-      .hiw-step { display: none; }
-      .hiw-step.active { display: block; }
-
-      .features-grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    @media (max-width: 600px) {
-      .hiw-phone-wrap { width: 180px; height: 360px; }
-
-      .features-grid { grid-template-columns: 1fr; }
-
-      .screen-img-side { display: none; }
-      .screen-img-main { height: 480px; }
-
-      .footer-inner { flex-direction: column; align-items: flex-start; }
-    }
-
-    @media (max-width: 560px) {
-      section { padding: 72px 0; }
-      .waitlist-form { flex-direction: column; }
-      .waitlist-input { border-right: 1px solid rgba(216,198,159,0.22); border-bottom: none; }
-      .waitlist-submit { padding: 16px; }
-    }
-  </style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600&amp;family=Hanken+Grotesk:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap">
+
+  <!-- Sets the class the reveal animation is scoped to, before first paint.
+       If this never runs — JS blocked, script error — every .reveal element
+       stays at full opacity and the page renders complete rather than blank.
+       See the Reveal section of styles/site.css. -->
+  <script>document.documentElement.className += ' js';</script>
+
+  <link rel="stylesheet" href="styles/site.css">
 </head>
 <body>
 
-  <!-- ===== NAV ===== -->
+  <!-- ═══════════ NAV ═══════════ -->
   <nav id="nav">
     <a href="#hero" class="nav-logo" aria-label="VOYAIGE home">
-      <img src="assets/logo-mark.png" alt="" aria-hidden="true" width="48" height="40" style="display:block;">
+      <img src="assets/logo-mark.webp" alt="" aria-hidden="true" width="240" height="216">
       <span class="nav-wordmark">VOYAIGE</span>
     </a>
-    <a href="#waitlist" class="nav-cta">Early Access</a>
+    <a href="#waitlist" class="nav-cta">Request a place</a>
   </nav>
 
 
-  <!-- ===== HERO ===== -->
+  <!-- ═══════════ HERO — the stage ═══════════ -->
   <section id="hero">
-    <!-- Animated grid populated by JS -->
-    <svg id="hero-grid" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
-    <div class="hero-glow" aria-hidden="true"></div>
-
-    <div class="hero-content">
+    <div class="hero-inner">
       <div class="hero-mark">
-        <img src="assets/logo-mark.png" alt="" aria-hidden="true" width="130" height="108" style="display:block; margin: 0 auto;">
+        <img src="assets/logo-mark.webp" alt="" aria-hidden="true" width="240" height="216">
       </div>
 
-      <p class="eyebrow hero-eyebrow">Introducing VOYAIGE</p>
+      <p class="eyebrow hero-eyebrow">For the one who remembers</p>
 
-      <h1 class="display hero-headline" id="heroHeadline">Life. Handled.</h1>
+      <h1 class="display hero-headline">It doesn&rsquo;t wait to be asked.</h1>
 
       <p class="hero-sub">
-        Your AI concierge for when plans change.<br>
-        Calm, clear, and always one step ahead.
+        VOYAIGE runs your life in the background &mdash; catching what you&rsquo;d miss,
+        and handling what it can before you&rsquo;ve noticed it needs handling.
       </p>
 
       <div class="hero-cta-group">
         <a href="#waitlist" class="btn-primary">
-          Request Early Access
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          Request a beta place
+          <svg width="15" height="15" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
-        <span class="hero-note">Limited spots &nbsp;·&nbsp; No spam &nbsp;·&nbsp; Unsubscribe anytime</span>
+        <span class="hero-note">Ten households &nbsp;&middot;&nbsp; No spam &nbsp;&middot;&nbsp; Unsubscribe anytime</span>
       </div>
     </div>
-
-    <div class="scroll-hint" aria-hidden="true">
-      <div class="scroll-hint-line"></div>
-    </div>
+    <div class="scroll-hint" aria-hidden="true"></div>
   </section>
 
 
-  <!-- ===== HOW IT WORKS ===== -->
+  <!-- ═══════════ HOW IT WORKS ═══════════ -->
   <section id="how-it-works">
-    <div class="hiw-sticky">
-      <div class="container">
-        <div class="hiw-inner">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">How it works</span>
+        <h2 class="display section-headline">You don&rsquo;t open it.<br>It&rsquo;s already working.</h2>
+        <p class="section-sub">
+          It reads the week ahead against everything it already holds, and moves
+          before you need to ask.
+        </p>
+      </div>
 
-          <div class="hiw-left">
-            <div class="hiw-header">
-              <p class="eyebrow">The VOYAIGE process</p>
-              <h2 class="display hiw-headline">
-                When plans break,<br>we take over.
-              </h2>
+      <div class="hiw-grid">
+        <div class="hiw-steps" id="hiwSteps">
+
+          <div class="hiw-step active" data-step="0">
+            <div class="step-top">
+              <span class="step-num">01</span>
+              <h3 class="step-heading">Most days, nothing needs you.</h3>
             </div>
-
-            <div id="hiwSteps">
-              <div class="hiw-step active" data-step="0">
-                <div class="step-top">
-                  <div class="step-num-badge">01</div>
-                  <h3 class="step-heading">Disruption Detected</h3>
-                </div>
-                <p class="step-body">
-                  VOYAIGE monitors your trip in real time. If a flight is cancelled,
-                  a hotel falls through, or weather changes your plans, it immediately
-                  finds the <strong>best alternative options</strong>.
-                </p>
-                <div class="step-progress-track"><div class="step-progress-fill" id="fill-0"></div></div>
-              </div>
-
-              <div class="hiw-step" data-step="1">
-                <div class="step-top">
-                  <div class="step-num-badge">02</div>
-                  <h3 class="step-heading">You Choose the Solution</h3>
-                </div>
-                <p class="step-body">
-                  VOYAIGE presents a few <strong>optimised options</strong> tailored to
-                  your preferences, schedule, and budget. You simply
-                  <strong>pick the one you want</strong>.
-                </p>
-                <div class="step-progress-track"><div class="step-progress-fill" id="fill-1"></div></div>
-              </div>
-
-              <div class="hiw-step" data-step="2">
-                <div class="step-top">
-                  <div class="step-num-badge">03</div>
-                  <h3 class="step-heading">VOYAIGE Executes Everything</h3>
-                </div>
-                <p class="step-body">
-                  Once you choose, VOYAIGE <strong>handles the rest</strong>. Flights rebooked,
-                  hotels confirmed, transport arranged, your itinerary updated automatically.
-                  You get one notification: <strong>"Your plans are updated."</strong>
-                </p>
-                <div class="step-progress-track"><div class="step-progress-fill" id="fill-2"></div></div>
-              </div>
-            </div>
+            <p class="step-body">
+              It is reading the week against what it already holds &mdash; the
+              confirmations you forwarded, the calendar, the things you told it
+              once. <strong>A quiet day reads as quiet</strong>, not as an empty
+              container waiting to be filled in.
+            </p>
+            <div class="step-track"><div class="step-fill" id="fill-0"></div></div>
           </div>
 
-          <!-- Phone visual -->
-          <div class="hiw-visual">
-            <div class="hiw-phone-wrap" id="hiwPhones">
-              <div class="hiw-screen active" data-screen="0">
-                <img src="assets/screen-analysing.png" alt="VOYAIGE analysing your disruption" loading="lazy">
-              </div>
-              <div class="hiw-screen" data-screen="1">
-                <img src="assets/screen-options.png" alt="VOYAIGE presenting your options" loading="lazy">
-              </div>
-              <div class="hiw-screen" data-screen="2">
-                <img src="assets/screen-resolved.png" alt="VOYAIGE — resolved and handled" loading="lazy">
-              </div>
+          <div class="hiw-step" data-step="1">
+            <div class="step-top">
+              <span class="step-num">02</span>
+              <h3 class="step-heading">When something breaks, it&rsquo;s already open.</h3>
             </div>
+            <p class="step-body">
+              There is nothing to report. <strong>The case is there when you
+              look</strong> &mdash; the situation stated plainly, the clock
+              already running, and the work already started.
+            </p>
+            <div class="step-track"><div class="step-fill" id="fill-1"></div></div>
           </div>
 
+          <div class="hiw-step" data-step="2">
+            <div class="step-top">
+              <span class="step-num">03</span>
+              <h3 class="step-heading">Three options. One recommended.</h3>
+            </div>
+            <p class="step-body">
+              At most three ways forward, and the one it would take.
+              <strong>It is never paid to recommend</strong> &mdash; the engine
+              cannot see what pays more. You make one decision; it carries out
+              the rest and writes down what happened.
+            </p>
+            <div class="step-track"><div class="step-fill" id="fill-2"></div></div>
+          </div>
+
+          <p class="hiw-kicker reveal">
+            Every other app leads with what you owe. This one leads with what has
+            been handled, then what you need to know, then &mdash; briefly &mdash;
+            what needs you. <strong>If that last list is ever the longest, it has
+            become a to-do list and it has failed.</strong>
+          </p>
+        </div>
+
+        <div class="hiw-visual">
+          <div class="phone" id="hiwPhone">
+            <div class="phone-screen active" data-screen="0">
+              <img src="assets/screen-quiet.webp" alt="The VOYAIGE home screen on a quiet day, reading “All quiet — nothing needs you right now”, with the days ahead listed below." width="640" height="1391" loading="lazy" decoding="async">
+            </div>
+            <div class="phone-screen" data-screen="1">
+              <img src="assets/screen-case.webp" alt="The VOYAIGE home screen with an open case: a cancelled flight, three options ready, one recommended." width="640" height="1391" loading="lazy" decoding="async">
+            </div>
+            <div class="phone-screen" data-screen="2">
+              <img src="assets/screen-options.webp" alt="A VOYAIGE case detail screen showing the options for a cancelled flight, with one marked Recommended." width="640" height="1391" loading="lazy" decoding="async">
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
 
-  <!-- ===== FEATURES ===== -->
+  <!-- ═══════════ WHAT IT DOES ═══════════ -->
   <section id="features">
     <div class="container">
-      <div class="features-header">
-        <p class="eyebrow reveal">The four pillars</p>
-        <h2 class="display features-headline reveal reveal-d1">
-          One concierge.<br>Every situation.
+      <div class="section-head reveal">
+        <span class="eyebrow">What it does</span>
+        <h2 class="display section-headline">
+          It doesn&rsquo;t take tasks off your list.<br>It takes responsibility off your shoulders.
         </h2>
+        <p class="section-sub">
+          Four things, and they are the four that actually cost you: the
+          anticipating, the deciding, the watching, and the remembering.
+        </p>
       </div>
+
       <div class="features-grid">
         <div class="feature-card reveal">
-          <span class="feature-num">Find</span>
-          <h3 class="feature-title">Curated, not searched.</h3>
-          <p class="feature-body">VOYAIGE knows your taste. It returns one recommendation — the right one — for flights, hotels, restaurants, and activities. No endless scrolling. No comparing tabs.</p>
+          <span class="feature-label">Anticipate</span>
+          <h3 class="feature-title">Sees it coming while it&rsquo;s still small.</h3>
+          <p class="feature-body">
+            Forward the school email, the booking confirmation, the reminder you
+            would have filed and never found again. It reads them, puts them on
+            the week, and notices the two things that cannot both happen on
+            Thursday.
+          </p>
         </div>
+
         <div class="feature-card reveal reveal-d1">
-          <span class="feature-num">Fix</span>
-          <h3 class="feature-title">Disruptions, handled.</h3>
-          <p class="feature-body">Flight cancelled. Hotel overbooked. Plans changed. VOYAIGE takes ownership, presents clear options, and resolves it — so you never sit on hold again.</p>
+          <span class="feature-label">Decide</span>
+          <h3 class="feature-title">One answer, not a search.</h3>
+          <p class="feature-body">
+            Three options at most and one it recommends, judged against what you
+            have already told it matters. It is never paid to recommend: the
+            engine cannot see what pays more. That is structural, not a promise.
+          </p>
         </div>
+
         <div class="feature-card reveal reveal-d2">
-          <span class="feature-num">Protect</span>
-          <h3 class="feature-title">Aware before you arrive.</h3>
-          <p class="feature-body">Location-specific safety intelligence delivered before and during your trip. Neighbourhood awareness, local customs, transport tips — confident and direct.</p>
+          <span class="feature-label">Monitor</span>
+          <h3 class="feature-title">It holds the watch.</h3>
+          <p class="feature-body">
+            Flights, bookings, when to leave, the thing somebody promised to
+            confirm and then did not. It goes back and looks again rather than
+            assuming &mdash; and a confirmation only counts when there is
+            something to show for it.
+          </p>
         </div>
+
         <div class="feature-card reveal reveal-d3">
-          <span class="feature-num">Inform</span>
-          <h3 class="feature-title">One step ahead of your day.</h3>
-          <p class="feature-body">Your bus is late — take the train instead. Weather's turning — here's a better plan. VOYAIGE reads your schedule and acts before you need to ask.</p>
+          <span class="feature-label">Remember</span>
+          <h3 class="feature-title">It doesn&rsquo;t start from zero.</h3>
+          <p class="feature-body">
+            Anything that asks you the same questions every time is a stranger,
+            and you don&rsquo;t hand your life to a stranger. It keeps what
+            worked last time, who to call, and how you like things done.
+          </p>
+        </div>
+      </div>
+
+      <!-- Canon §4, the sixth belief: we say what isn't built yet, then
+           immediately name one thing that isn't. -->
+      <div class="honesty reveal">
+        <div>
+          <span class="eyebrow">What isn&rsquo;t built yet</span>
+          <h3 class="honesty-title">We&rsquo;d rather tell you now.</h3>
+        </div>
+        <div>
+          <p>
+            The watching is live: it reads what you give it and finds what&rsquo;s
+            coming. The going-and-doing-it part sits behind a bar it has to clear
+            before we&rsquo;ll claim it, rather than behind a launch date. And
+            <strong>the beta is ten households on purpose</strong>.
+          </p>
+          <p>
+            And one specific thing it does not do: it does not yet work out on
+            its own that a document expires before a trip you have already
+            booked. It captures what you give it and watches that. The day it
+            detects, we&rsquo;ll say so &mdash; and not a day before.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
 
-  <!-- ===== APP PREVIEW ===== -->
+  <!-- ═══════════ THE EXPERIENCE ═══════════ -->
   <section id="preview">
     <div class="container">
-      <div class="preview-header reveal">
-        <p class="eyebrow">The experience</p>
-        <h2 class="display preview-headline">Built for calm.<br>Designed for clarity.</h2>
-        <p class="preview-sub">A premium interface that feels as reassuring as it looks.</p>
+      <div class="section-head reveal">
+        <span class="eyebrow">The experience</span>
+        <h2 class="display section-headline">Quiet on a quiet day.</h2>
+        <p class="section-sub">
+          A day with nothing on it should read as the promise being kept &mdash;
+          never as an empty container implying something was left undone.
+        </p>
       </div>
 
       <div class="phones-row">
-        <!-- Concierge — left -->
-        <img
-          src="assets/screen-concierge.png"
-          alt="VOYAIGE Concierge screen"
-          class="screen-img screen-img-side reveal reveal-d1"
-          loading="lazy"
-        >
-        <!-- Home — centre hero -->
-        <img
-          src="assets/screen-home.png"
-          alt="VOYAIGE Home screen"
-          class="screen-img screen-img-main reveal"
-          loading="lazy"
-        >
-        <!-- Preferences — right -->
-        <img
-          src="assets/screen-preferences.png"
-          alt="VOYAIGE Preferences screen"
-          class="screen-img screen-img-side reveal reveal-d2"
-          loading="lazy"
-        >
+        <img class="screen-side reveal reveal-d1" src="assets/screen-week.webp"
+             alt="The VOYAIGE week view, showing each day ahead and what is on it." width="640" height="1391" loading="lazy" decoding="async">
+        <img class="screen-main reveal" src="assets/screen-chat.webp"
+             alt="A VOYAIGE conversation resolving a cancelled flight, ending in a single recommendation." width="640" height="1391" loading="lazy" decoding="async">
+        <img class="screen-side reveal reveal-d2" src="assets/screen-resolved.webp"
+             alt="The VOYAIGE cases list, showing one active case and one already resolved." width="640" height="1391" loading="lazy" decoding="async">
       </div>
     </div>
   </section>
 
 
-  <!-- ===== WAITLIST ===== -->
+  <!-- ═══════════ THE BETA ═══════════ -->
   <section id="waitlist">
     <div class="container">
       <div class="waitlist-inner">
-        <p class="eyebrow reveal">Early access</p>
-        <h2 class="display waitlist-headline reveal reveal-d1">Be first.<br>Get early access.</h2>
+        <span class="eyebrow reveal">The beta</span>
+        <h2 class="display waitlist-headline reveal reveal-d1">Ten households.<br>That&rsquo;s the beta.</h2>
         <p class="waitlist-sub reveal reveal-d2">
-          VOYAIGE is launching soon. Join the waitlist and be among
-          the first to experience a calmer, clearer way to handle your world.
+          We&rsquo;re opening VOYAIGE to ten households first and working with
+          them closely. If you&rsquo;re the one in your house who remembers
+          everything, leave your name &mdash; we&rsquo;ll tell you what&rsquo;s
+          working and what isn&rsquo;t.
         </p>
-        <form class="waitlist-form reveal reveal-d3" id="waitlistForm" novalidate>
-          <input type="email" class="waitlist-input" id="emailInput"
-            placeholder="Your email address" autocomplete="email" required>
-          <button type="submit" class="waitlist-submit" id="submitBtn">Join Waitlist</button>
+
+        <form class="waitlist-form reveal reveal-d3" id="waitlistForm" data-source="site" novalidate>
+          <div class="field-row">
+            <div class="field">
+              <label for="firstName">First name</label>
+              <input type="text" id="firstName" name="firstName" autocomplete="given-name"
+                     placeholder="Ryan" required maxlength="80"
+                     aria-describedby="firstNameError">
+              <span class="field-error" id="firstNameError" role="status" aria-live="polite"></span>
+            </div>
+            <div class="field">
+              <label for="lastName">Last name</label>
+              <input type="text" id="lastName" name="lastName" autocomplete="family-name"
+                     placeholder="Walsh" required maxlength="80"
+                     aria-describedby="lastNameError">
+              <span class="field-error" id="lastNameError" role="status" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email"
+                   placeholder="you@example.com" required maxlength="254"
+                   aria-describedby="emailError">
+            <span class="field-error" id="emailError" role="status" aria-live="polite"></span>
+          </div>
+
+          <!-- Not for people. Off-screen rather than display:none, because the
+               bots that skip a hidden field are the ones that read the
+               computed style. The name is deliberately non-semantic: an
+               address-autofill name like "company" gets filled by the browser
+               even against autocomplete="off", and a filled honeypot is a
+               silently dropped signup. -->
+          <div class="hp" aria-hidden="true">
+            <label for="vgNote">Leave this empty</label>
+            <input type="text" id="vgNote" name="vgNote" tabindex="-1" autocomplete="off">
+          </div>
+
+          <button type="submit" class="waitlist-submit" id="submitBtn">Request a place</button>
         </form>
-        <p class="waitlist-status" id="waitlistStatus" role="status" aria-live="polite"></p>
-        <p class="waitlist-note reveal reveal-d4">No spam. No noise. Just VOYAIGE.</p>
+
+        <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+
+        <p class="waitlist-note reveal">One email to confirm. Nothing after that until there&rsquo;s something real to say.</p>
+
+        <p class="waitlist-legal reveal">
+          We keep your name and email so we can write to you about the beta, and
+          nothing else &mdash; no tracking, no third-party advertising. Ask at
+          <a href="mailto:ryan@voyaige.app">ryan@voyaige.app</a> and it&rsquo;s
+          deleted; the confirmation email carries a one-tap link for the same thing.
+        </p>
+
+        <p class="tribute reveal">
+          Here&rsquo;s to the ones who remember.
+          <span>The one who knows where the passports are. Nobody notices remembering &mdash; they only notice when you don&rsquo;t.</span>
+        </p>
       </div>
     </div>
   </section>
 
 
-  <!-- ===== FOOTER ===== -->
+  <!-- ═══════════ FOOTER ═══════════ -->
   <footer>
     <div class="container">
       <div class="footer-inner">
         <a href="#hero" class="footer-logo" aria-label="Back to top">
-          <img src="assets/logo-mark.png" alt="" aria-hidden="true" width="40" height="33" style="display:block; opacity:0.5;">
+          <img src="assets/logo-mark.webp" alt="" aria-hidden="true" width="240" height="216">
           <span class="footer-wordmark">VOYAIGE</span>
         </a>
         <div class="footer-links">
           <a href="https://instagram.com/voyaige.app" class="footer-link" target="_blank" rel="noopener noreferrer">Instagram</a>
           <a href="mailto:ryan@voyaige.app" class="footer-link">Contact</a>
         </div>
-        <span class="footer-copy">&copy; 2025 VOYAIGE. All rights reserved.</span>
+        <div>
+          <p class="footer-tagline">Life. Handled.</p>
+          <p class="footer-meta">&copy; 2026 VOYAIGE</p>
+        </div>
       </div>
     </div>
   </footer>
 
-
-  <script>
-  // ═══════════════════════════════════════════════
-  //  NAV
-  // ═══════════════════════════════════════════════
-  const nav = document.getElementById('nav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 48);
-  }, { passive: true });
-
-  // ═══════════════════════════════════════════════
-  //  HERO: ANIMATED GRID PATTERN
-  //  Translated from AnimatedGridPattern React component
-  // ═══════════════════════════════════════════════
-  (function initAnimatedGrid() {
-    const ns         = 'http://www.w3.org/2000/svg';
-    const svg        = document.getElementById('hero-grid');
-    const hero       = document.getElementById('hero');
-    const CELL       = 40;
-    const NUM_SQ     = 50;
-    const MAX_OP     = 0.14;   // max opacity for lit squares
-    const DURATION   = [3, 5]; // random range in seconds
-
-    // Unique pattern ID (avoids conflicts if page has multiple SVGs)
-    const pid = 'gp-' + Math.random().toString(36).slice(2, 7);
-
-    // ── Grid line pattern ──────────────────────────
-    const defs    = document.createElementNS(ns, 'defs');
-    const pattern = document.createElementNS(ns, 'pattern');
-    pattern.id = pid;
-    pattern.setAttribute('width',  CELL);
-    pattern.setAttribute('height', CELL);
-    pattern.setAttribute('patternUnits', 'userSpaceOnUse');
-    pattern.setAttribute('x', -1);
-    pattern.setAttribute('y', -1);
-
-    const linePath = document.createElementNS(ns, 'path');
-    linePath.setAttribute('d', `M.5 ${CELL}V.5H${CELL}`);
-    linePath.setAttribute('fill', 'none');
-    linePath.setAttribute('stroke', 'rgba(216,198,159,0.22)');
-    linePath.setAttribute('stroke-width', '0.6');
-    pattern.appendChild(linePath);
-    defs.appendChild(pattern);
-    svg.appendChild(defs);
-
-    // ── Grid background rect ───────────────────────
-    const bg = document.createElementNS(ns, 'rect');
-    bg.setAttribute('width',  '100%');
-    bg.setAttribute('height', '100%');
-    bg.setAttribute('fill',   `url(#${pid})`);
-    svg.appendChild(bg);
-
-    // ── Twinkling squares ──────────────────────────
-    const squaresG = document.createElementNS(ns, 'g');
-    squaresG.id = 'grid-squares-g';
-    svg.appendChild(squaresG);
-
-    function cols() { return Math.max(1, Math.floor(hero.offsetWidth  / CELL)); }
-    function rows() { return Math.max(1, Math.floor(hero.offsetHeight / CELL)); }
-
-    function randomPos() {
-      return [
-        Math.floor(Math.random() * cols()) * CELL + 1,
-        Math.floor(Math.random() * rows()) * CELL + 1,
-      ];
-    }
-
-    for (let i = 0; i < NUM_SQ; i++) {
-      const [x, y] = randomPos();
-      const rect   = document.createElementNS(ns, 'rect');
-      rect.setAttribute('width',  CELL - 1);
-      rect.setAttribute('height', CELL - 1);
-      rect.setAttribute('x', x);
-      rect.setAttribute('y', y);
-      rect.setAttribute('fill', `rgba(216,198,159,${MAX_OP})`);
-      rect.setAttribute('stroke-width', '0');
-
-      const dur   = (DURATION[0] + Math.random() * (DURATION[1] - DURATION[0])).toFixed(2);
-      const delay = (-(Math.random() * parseFloat(dur))).toFixed(2); // mid-flight start
-      rect.style.animation       = `gridSquarePulse ${dur}s ${delay}s infinite`;
-      rect.style.animationFillMode = 'none';
-
-      // Move to new random cell each time the animation loops
-      rect.addEventListener('animationiteration', () => {
-        const [nx, ny] = randomPos();
-        rect.setAttribute('x', nx);
-        rect.setAttribute('y', ny);
-      });
-
-      squaresG.appendChild(rect);
-    }
-  })();
-
-  // ═══════════════════════════════════════════════
-  //  HERO: LETTER-BY-LETTER HEADLINE
-  // ═══════════════════════════════════════════════
-  (function animateHeadline() {
-    const el    = document.getElementById('heroHeadline');
-    const words = el.textContent.trim().split(' ');
-    el.textContent = '';
-    let idx = 0;
-
-    words.forEach((word, wi) => {
-      const span = document.createElement('span');
-      span.className = 'word';
-      word.split('').forEach((ch) => {
-        const l = document.createElement('span');
-        l.className = 'letter';
-        l.textContent = ch;
-        l.style.animationDelay = (wi * 0.12 + idx * 0.035 + 0.8).toFixed(3) + 's';
-        span.appendChild(l);
-        idx++;
-      });
-      el.appendChild(span);
-      idx++; // space
-    });
-  })();
-
-  // ═══════════════════════════════════════════════
-  //  HOW IT WORKS — Scroll-driven
-  // ═══════════════════════════════════════════════
-  (function initScrollSteps() {
-    const STEPS           = 3;
-    const SCROLL_PER_STEP = 360;
-    const TOTAL           = STEPS * SCROLL_PER_STEP;
-    const MOBILE_BP       = 900;
-    const AUTO_INTERVAL   = 4000; // ms per step on mobile
-
-    const section = document.getElementById('how-it-works');
-    const steps   = section.querySelectorAll('.hiw-step');
-    const screens = section.querySelectorAll('.hiw-screen');
-    const fills   = [
-      document.getElementById('fill-0'),
-      document.getElementById('fill-1'),
-      document.getElementById('fill-2'),
-    ];
-
-    let autoTimer = null;
-    let mobileStep = 0;
-
-    function isMobile() { return window.innerWidth <= MOBILE_BP; }
-
-    function setStep(idx) {
-      steps.forEach((s, i)   => s.classList.toggle('active', i === idx));
-      screens.forEach((s, i) => s.classList.toggle('active', i === idx));
-      fills.forEach((f, i) => {
-        f.style.width = i < idx ? '100%' : i === idx ? '100%' : '0%';
-      });
-    }
-
-    // Desktop: scroll-driven
-    function updateScroll() {
-      if (isMobile()) return;
-      const top      = section.getBoundingClientRect().top + window.scrollY;
-      const scrolled = Math.max(0, window.scrollY - top);
-      const progress = Math.min(scrolled / TOTAL, 1);
-      const stepF    = progress * STEPS;
-      const stepIdx  = Math.min(Math.floor(stepF), STEPS - 1);
-      const fillPct  = (stepF % 1) * 100;
-
-      steps.forEach((s, i)   => s.classList.toggle('active', i === stepIdx));
-      screens.forEach((s, i) => s.classList.toggle('active', i === stepIdx));
-      fills.forEach((f, i) => {
-        f.style.width = i < stepIdx ? '100%' : i === stepIdx ? fillPct.toFixed(1) + '%' : '0%';
-      });
-    }
-
-    // Mobile: auto-rotate steps
-    function startAutoRotate() {
-      stopAutoRotate();
-      autoTimer = setInterval(() => {
-        mobileStep = (mobileStep + 1) % STEPS;
-        setStep(mobileStep);
-      }, AUTO_INTERVAL);
-    }
-
-    function stopAutoRotate() {
-      if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
-    }
-
-    function handleMode() {
-      if (isMobile()) {
-        section.style.height = '';
-        stopAutoRotate();
-        mobileStep = 0;
-        setStep(0);
-        startAutoRotate();
-      } else {
-        stopAutoRotate();
-        section.style.height = `calc(100vh + ${TOTAL}px)`;
-        updateScroll();
-      }
-    }
-
-    window.addEventListener('scroll', updateScroll, { passive: true });
-    window.addEventListener('resize', handleMode);
-    handleMode();
-  })();
-
-  // ═══════════════════════════════════════════════
-  //  WAITLIST → LOOPS.SO
-  //  Loops replies with `access-control-allow-origin: *`,
-  //  so the browser can read the real response. Every
-  //  outcome below is reported from that response — we
-  //  never claim a signup we haven't seen confirmed.
-  // ═══════════════════════════════════════════════
-  (function() {
-    const LOOPS_FORM_ID  = 'cmnwkk5n117180i1v09d8im8f';
-    const LOOPS_ENDPOINT = `https://app.loops.so/api/newsletter-form/${LOOPS_FORM_ID}`;
-    const CONTACT_EMAIL  = 'ryan@voyaige.app';
-    const EMAIL_PATTERN  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const RESET_DELAY_MS = 4000;
-
-    const form   = document.getElementById('waitlistForm');
-    const input  = document.getElementById('emailInput');
-    const btn    = document.getElementById('submitBtn');
-    const status = document.getElementById('waitlistStatus');
-
-    function setStatus(message, kind) {
-      status.textContent = message;
-      status.className = kind ? `waitlist-status is-${kind}` : 'waitlist-status';
-    }
-
-    function resetButton() {
-      btn.textContent = 'Join Waitlist';
-      btn.classList.remove('is-sent');
-      btn.disabled = false;
-    }
-
-    // Loops answers with JSON, but Cloudflare's rate limiter answers with
-    // plain text ("error code: 1015") — so never assume the body parses.
-    async function readBody(res) {
-      try { return JSON.parse(await res.text()); } catch { return null; }
-    }
-
-    function failureMessage(res, body) {
-      if (body && body.message) return body.message;
-      if (res.status === 429) return 'Too many attempts just now. Wait a moment, then try again.';
-      return `Something went wrong (error ${res.status}) and you are not on the list. `
-           + `Please try again, or email ${CONTACT_EMAIL}.`;
-    }
-
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      const email = input.value.trim();
-
-      if (!EMAIL_PATTERN.test(email)) {
-        setStatus('Enter a valid email address.', 'error');
-        input.focus();
-        return;
-      }
-
-      setStatus('', null);
-      btn.textContent = 'Sending...';
-      btn.disabled = true;
-
-      let res;
-      try {
-        // Form-encoded, NOT JSON — and the Content-Type is deliberately left
-        // for fetch to set. `application/x-www-form-urlencoded` is a
-        // CORS-safelisted content type, so this goes as a "simple request" and
-        // the browser sends it straight through.
-        //
-        // `application/json` is NOT safelisted: it forces a CORS preflight, and
-        // Loops answers OPTIONS with 405 `Method Not Allowed` (allow: POST). A
-        // preflight must return 2xx, so the browser blocked the POST, fetch
-        // rejected, and EVERY visitor got "we couldn't reach the server" with
-        // nothing recorded. Broken 2026-06-20 to 2026-08-29, found from a real
-        // report — invisible to curl, which does not enforce CORS.
-        // Do not add a Content-Type header here.
-        res = await fetch(LOOPS_ENDPOINT, {
-          method: 'POST',
-          body: new URLSearchParams({ email }),
-        });
-      } catch {
-        // Offline, or the request never left the browser (blocker/extension).
-        setStatus(`We couldn't reach the server, so you are not on the list yet. `
-                + `Check your connection and try again, or email ${CONTACT_EMAIL}.`, 'error');
-        resetButton();
-        return;
-      }
-
-      const body = await readBody(res);
-      const isAccepted = res.ok && (!body || body.success !== false);
-
-      if (!isAccepted) {
-        setStatus(failureMessage(res, body), 'error');
-        resetButton();
-        return;
-      }
-
-      input.value = '';
-      setStatus('You\'re on the list. Watch your inbox.', 'success');
-      btn.textContent = 'You\'re on the list';
-      btn.classList.add('is-sent');
-      setTimeout(resetButton, RESET_DELAY_MS);
-    });
-  })();
-
-  // ═══════════════════════════════════════════════
-  //  SCROLL REVEAL (shared observer)
-  // ═══════════════════════════════════════════════
-  (function() {
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-  })();
-  </script>
-
+  <script src="js/site.js" defer></script>
+  <script src="js/waitlist.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,660 @@
+/* =============================================================================
+   VOYAIGE — the marketing site's skin.
+
+   NAVY-TO-PAPER. Every value below is a token from the app's own design system
+   (.notes/current/design-system.md, switchover 2026-08-31), not an
+   approximation of it. The previous skin was #0D1B2A navy on #D8C69F champagne
+   gold; both of those tokens were DELETED from the app on 2026-08-31 —
+   `champagneGold` and `midnightNavy` are named in the design doc's "Dead" list —
+   so the site was showing a palette the product no longer has.
+
+   The three faces are the app's three bundled faces, which are all on Google
+   Fonts: Bricolage Grotesque (display), Hanken Grotesk (interface), IBM Plex
+   Mono (data and labels). Same reasoning: not "something similar".
+
+   THE ONE STRUCTURAL IDEA: the app puts a dark "stage" card on a paper page,
+   and that is the motif this site is built from. The hero is a stage. The
+   page around it is paper.
+============================================================================= */
+
+/* ─── Tokens — VColor, light scheme ──────────────────────────────────────── */
+
+:root {
+  /* Ink and ground */
+  --paper:          #EDECE6;
+  --surface-subtle: #F6F5F1;
+  --card:           #FFFFFF;
+  --ink:            #191A17;
+  --text-secondary: #4E5049;
+  --text-tertiary:  #6A6C64;
+  --ink-faint:      #868880;   /* non-text only — strokes, chevrons */
+  --line:           #DFDDD4;
+
+  /* The accent, split into its two weights. They read as one colour. */
+  --accent-fill:    #C4762B;   /* fills, pips — NON-TEXT (2.97:1) */
+  --accent-text:    #A05808;   /* accent words on light (4.56:1) */
+  --accent-on-dark: #E0A063;   /* accent text on a dark ground (6.85:1) */
+  --accent-soft:    #F7EEE3;
+  --accent-line:    #E4CDAE;
+  --on-accent:      #2A1B08;   /* the ONLY text colour on an accent fill */
+
+  /* The stage */
+  --stage-top:      #2B303B;
+  --stage-mid:      #21252E;
+  --stage-bottom:   #1C2027;
+  --on-stage:       #F2F1EC;
+  --on-stage-dim:   #A8AEBB;
+  --on-stage-label: #8C94A4;
+  --stage-line:     rgba(255, 255, 255, 0.10);
+
+  --display: 'Bricolage Grotesque', 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ui:      'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --gutter:  clamp(20px, 5vw, 48px);
+  --section: clamp(72px, 11vw, 132px);
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--ui);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; display: block; }
+
+::selection { background: var(--accent-line); color: var(--ink); }
+
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ─── Shared type ────────────────────────────────────────────────────────── */
+
+.display {
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.container { max-width: 1120px; margin: 0 auto; padding: 0 var(--gutter); }
+
+section { padding: var(--section) 0; position: relative; }
+
+.rule { border: 0; border-top: 1px solid var(--line); }
+
+/* ─── Reveal ─────────────────────────────────────────────────────────────── */
+
+/* SCOPED TO `.js`, and that scope is the whole point.
+   `.reveal` sits in the MARKUP on nineteen elements, including the beta
+   signup form and the section around it. An unscoped `opacity: 0` here means
+   that with JavaScript blocked, erroring, or simply slow to parse, the only
+   conversion path on the page is invisible with no fallback — a page that
+   hides its own form is worse than a page with no animation.
+   The `.js` class is set by a two-line inline script in <head>, before first
+   paint, so there is no flash of un-hidden content either. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+              transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.js .reveal.visible { opacity: 1; transform: none; }
+.reveal-d1 { transition-delay: 0.08s; }
+.reveal-d2 { transition-delay: 0.16s; }
+.reveal-d3 { transition-delay: 0.24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ─── Nav ────────────────────────────────────────────────────────────────── */
+
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 22px var(--gutter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.4s, backdrop-filter 0.4s, padding 0.3s, border-color 0.4s;
+  border-bottom: 1px solid transparent;
+}
+
+nav.scrolled {
+  padding: 13px var(--gutter);
+  background: rgba(237, 236, 230, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom-color: var(--line);
+}
+
+.nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.nav-logo img { width: 38px; height: auto; transition: filter 0.4s, opacity 0.4s; }
+
+/* The logo mark is a light line drawing made for the dark stage. On paper it
+   is very nearly invisible, so every paper-ground instance renders it in ink:
+   brightness(0) keeps the alpha channel and blackens the strokes, which is
+   the same artwork rather than a second file to keep in sync. */
+nav.scrolled .nav-logo img,
+.footer-logo img,
+.confirm-logo img { filter: brightness(0); opacity: 0.62; }
+
+.nav-wordmark {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  color: var(--on-stage);
+  transition: color 0.4s;
+}
+nav.scrolled .nav-wordmark { color: var(--ink); }
+
+.nav-cta {
+  font-family: var(--ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--accent-fill);
+  padding: 10px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform 0.2s, filter 0.2s;
+}
+.nav-cta:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
+/* ─── Hero — the stage ───────────────────────────────────────────────────── */
+
+#hero {
+  min-height: 100svh;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(175deg, var(--stage-top), var(--stage-mid) 55%, var(--stage-bottom));
+  color: var(--on-stage);
+  overflow: hidden;
+}
+
+/* The app's stage carries a faint measured grid. Same idea, drawn in CSS so
+   the page pulls no extra asset for it. */
+#hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 42%, #000 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 42%, #000 20%, transparent 78%);
+  pointer-events: none;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  padding: 128px var(--gutter) 96px;
+  max-width: 940px;
+}
+
+.hero-mark { margin-bottom: 30px; }
+.hero-mark img { width: 104px; height: auto; margin: 0 auto; }
+
+.hero-eyebrow { color: var(--accent-on-dark); margin-bottom: 26px; }
+
+.hero-headline {
+  font-size: clamp(44px, 8vw, 98px);
+  text-wrap: balance;
+  margin-bottom: 30px;
+  color: var(--on-stage);
+}
+
+.hero-sub {
+  font-size: clamp(17px, 2.1vw, 21px);
+  line-height: 1.6;
+  color: var(--on-stage-dim);
+  max-width: 30ch;
+  margin: 0 auto 44px;
+  text-wrap: balance;
+}
+
+.hero-cta-group { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  font-size: 16px;
+  font-weight: 600;
+  padding: 16px 32px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform 0.2s, filter 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.btn-primary svg { transition: transform 0.2s; }
+.btn-primary:hover svg { transform: translateX(3px); }
+
+.hero-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--on-stage-label);
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 34px; left: 50%;
+  transform: translateX(-50%);
+  width: 1px; height: 52px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.28));
+}
+
+/* ─── Section headers ────────────────────────────────────────────────────── */
+
+.section-head { max-width: 760px; margin-bottom: clamp(48px, 7vw, 84px); }
+.section-head .eyebrow { display: block; margin-bottom: 18px; }
+
+.section-headline {
+  font-size: clamp(33px, 5vw, 58px);
+  margin-bottom: 20px;
+  text-wrap: balance;
+}
+
+.section-sub {
+  font-size: clamp(17px, 2vw, 19px);
+  color: var(--text-secondary);
+  max-width: 56ch;
+}
+
+/* ─── How it works — the three questions ─────────────────────────────────── */
+
+#how-it-works { background: var(--surface-subtle); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+
+.hiw-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.82fr);
+  gap: clamp(40px, 6vw, 88px);
+  align-items: start;
+}
+
+.hiw-steps { display: flex; flex-direction: column; gap: 8px; }
+
+.hiw-step {
+  padding: 26px 0 30px;
+  border-top: 1px solid var(--line);
+  opacity: 0.42;
+  transition: opacity 0.45s;
+}
+.hiw-step:last-child { border-bottom: 1px solid var(--line); }
+.hiw-step.active { opacity: 1; }
+
+.step-top { display: flex; align-items: baseline; gap: 14px; margin-bottom: 12px; }
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--accent-text);
+}
+
+.step-heading {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(22px, 3vw, 30px);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.step-body { font-size: 16.5px; color: var(--text-secondary); max-width: 48ch; }
+.step-body strong { color: var(--ink); font-weight: 600; }
+
+.step-track { height: 2px; background: var(--line); margin-top: 18px; overflow: hidden; }
+.step-fill { height: 100%; width: 0; background: var(--accent-fill); transition: width 0.12s linear; }
+
+.hiw-kicker {
+  margin-top: 34px;
+  padding: 20px 22px;
+  background: var(--accent-soft);
+  border-left: 2px solid var(--accent-fill);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  border-radius: 0 10px 10px 0;
+}
+.hiw-kicker strong { color: var(--ink); font-weight: 600; }
+
+/* The phone. Sticky so the screens change against the scrolling text. */
+.hiw-visual { position: sticky; top: 108px; display: flex; justify-content: center; }
+
+.phone {
+  position: relative;
+  width: min(300px, 78vw);
+  aspect-ratio: 1206 / 2622;
+}
+
+.phone-screen {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(0.985);
+  transition: opacity 0.5s, transform 0.5s;
+}
+.phone-screen.active { opacity: 1; transform: none; }
+
+.phone-screen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 34px;
+  border: 1px solid var(--line);
+  box-shadow: 0 26px 60px rgba(25, 26, 23, 0.13), 0 3px 10px rgba(25, 26, 23, 0.05);
+}
+
+/* ─── Features — what it does ────────────────────────────────────────────── */
+
+.features-grid {
+  display: grid;
+  /* Four cards, so two columns — NOT auto-fit. auto-fit resolves to three at
+     desktop widths and leaves one empty cell sitting in the middle of the
+     section. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.feature-card {
+  background: var(--card);
+  padding: clamp(28px, 3.4vw, 40px);
+  transition: background 0.3s;
+}
+.feature-card:hover { background: var(--surface-subtle); }
+
+.feature-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  display: block;
+  margin-bottom: 20px;
+}
+
+.feature-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(21px, 2.5vw, 26px);
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+  margin-bottom: 12px;
+}
+
+.feature-body { font-size: 16px; color: var(--text-secondary); }
+
+/* ─── The honesty strip ──────────────────────────────────────────────────── */
+
+.honesty {
+  margin-top: clamp(40px, 5vw, 64px);
+  padding: clamp(30px, 4vw, 48px);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+}
+
+.honesty .eyebrow { display: block; }
+
+.honesty-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(24px, 3vw, 32px);
+  letter-spacing: -0.02em;
+  line-height: 1.16;
+  margin-top: 14px;
+}
+
+.honesty p { font-size: 16.5px; color: var(--text-secondary); }
+.honesty p + p { margin-top: 16px; }
+.honesty strong { color: var(--ink); font-weight: 600; }
+
+/* ─── Preview ────────────────────────────────────────────────────────────── */
+
+#preview { text-align: center; background: var(--surface-subtle); border-top: 1px solid var(--line); }
+#preview .section-head { margin-left: auto; margin-right: auto; text-align: center; }
+#preview .section-sub { margin-left: auto; margin-right: auto; }
+
+.phones-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.6vw, 34px);
+}
+
+.phones-row img {
+  /* Cropped from the top to one shared height. Shown at their natural
+     1206:2622 they are 540px+ tall each, and two of the three screens are
+     deliberately sparse — so at full length the section reads as three
+     columns of empty paper. The top of a screen is the part worth showing. */
+  height: clamp(250px, 23vw, 330px);
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 26px;
+  border: 1px solid var(--line);
+  box-shadow: 0 26px 60px rgba(25, 26, 23, 0.13), 0 3px 10px rgba(25, 26, 23, 0.05);
+}
+
+.screen-side { width: clamp(150px, 21vw, 232px); opacity: 0.85; }
+.screen-main {
+  width: clamp(180px, 26vw, 284px);
+  height: clamp(295px, 27vw, 395px);
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Waitlist ───────────────────────────────────────────────────────────── */
+
+#waitlist { border-top: 1px solid var(--line); }
+
+.waitlist-inner { max-width: 620px; margin: 0 auto; text-align: center; }
+.waitlist-inner .eyebrow { display: block; margin-bottom: 18px; }
+
+.waitlist-headline { font-size: clamp(38px, 6.4vw, 72px); margin-bottom: 22px; }
+
+.waitlist-sub {
+  font-size: 17px;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  text-wrap: pretty;
+}
+
+.waitlist-form { display: grid; gap: 12px; text-align: left; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 7px;
+}
+
+.field input {
+  width: 100%;
+  font-family: var(--ui);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 14px 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input::placeholder { color: var(--ink-faint); }
+.field input:focus {
+  outline: none;
+  border-color: var(--accent-fill);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.field input[aria-invalid='true'] { border-color: var(--accent-text); }
+
+.field-error {
+  display: block;
+  min-height: 17px;
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--accent-text);
+}
+
+/* The honeypot. Off-screen rather than display:none — a bot that reads the
+   computed style skips a hidden field, and this one is meant to be filled in. */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.waitlist-submit {
+  margin-top: 6px;
+  width: 100%;
+  font-family: var(--ui);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--accent-fill);
+  border: none;
+  border-radius: 999px;
+  padding: 16px;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.2s;
+}
+.waitlist-submit:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+.waitlist-submit:disabled { cursor: default; opacity: 0.65; }
+
+.form-status {
+  min-height: 44px;
+  margin-top: 16px;
+  font-size: 15.5px;
+  line-height: 1.55;
+  text-align: center;
+}
+.form-status.is-error { color: var(--accent-text); }
+.form-status.is-success { color: var(--ink); font-weight: 500; }
+
+.waitlist-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* The collection notice. Small, but it is the only place the page says what
+   happens to what it just asked for, so it sits with the form rather than
+   behind a link — the privacy and terms drafts are not published, and
+   publishing them is a lawyer's call, not a copy sweep's (canon §12). */
+.waitlist-legal {
+  margin-top: 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-tertiary);
+  max-width: 46ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+.waitlist-legal a { color: var(--accent-text); }
+
+.tribute {
+  margin-top: clamp(56px, 8vw, 96px);
+  text-align: center;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(22px, 3.2vw, 34px);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.tribute span { display: block; margin-top: 12px; font-family: var(--ui); font-size: 16px; font-weight: 400; color: var(--text-secondary); letter-spacing: 0; }
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+
+footer { border-top: 1px solid var(--line); padding: 52px 0 60px; }
+
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+}
+
+.footer-logo { display: flex; align-items: center; gap: 11px; text-decoration: none; }
+.footer-logo img { width: 30px; height: auto; }
+.footer-wordmark { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.26em; color: var(--text-tertiary); }
+
+.footer-links { display: flex; flex-wrap: wrap; gap: 22px; }
+.footer-link { font-size: 14.5px; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+.footer-link:hover { color: var(--accent-text); }
+
+.footer-meta { font-size: 13px; color: var(--text-tertiary); }
+.footer-tagline { font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: -0.01em; color: var(--ink); }
+
+/* ─── Narrow ─────────────────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .hiw-grid { grid-template-columns: 1fr; }
+  .hiw-visual { position: static; order: -1; margin-bottom: 12px; }
+  .hiw-step { opacity: 1; }
+  .honesty { grid-template-columns: 1fr; }
+  .phones-row { gap: 10px; }
+  .screen-side { display: none; }
+  .screen-main { width: min(280px, 72vw); height: auto; }
+  .phones-row img { height: auto; object-fit: fill; }
+  .features-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+  .field-row { grid-template-columns: 1fr; }
+  .nav-cta { padding: 9px 17px; font-size: 12.5px; }
+}
