@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set up forwarding — VOYAIGE</title>
+  <meta name="description" content="Point the mail that matters at VoyAIge. One rule, once, from your computer.">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/tokens.css">
+  <style>
+    /* page-local overrides only */
+    .setup { padding-top: 160px; }
+    .setup-wrap { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
+    .setup-title { font-size: clamp(34px, 6vw, 46px); margin-top: 16px; }
+    .setup-sub { font-size: 15px; color: var(--white-dim); margin-top: 14px; line-height: 1.7; }
+
+    .step { margin-top: 56px; }
+    .step-num { font-size: 11px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+    .step-head { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 28px; letter-spacing: -0.01em; margin-top: 10px; }
+    .step-body { font-size: 15px; color: var(--white-dim); margin-top: 12px; line-height: 1.7; }
+    .step-body strong { color: var(--white); font-weight: 500; }
+
+    /* The gold-tinted notice, matching the .plan-selected-banner pattern. */
+    .notice {
+      border: 1px solid var(--gold-subtle); background: var(--gold-subtle);
+      padding: 20px 24px; margin-top: 20px; font-size: 14px;
+      color: var(--white-dim); line-height: 1.7;
+    }
+    .notice strong { color: var(--white); font-weight: 500; }
+    .notice-warn { border-color: rgba(232,165,116,0.35); background: rgba(232,165,116,0.08); }
+    .notice-warn strong { color: var(--pill-amber); }
+
+    .rules { list-style: none; margin-top: 20px; }
+    .rule { border: 1px solid var(--border); background: var(--navy-mid); padding: 20px 24px; margin-bottom: 12px; }
+    .rule-name { font-size: 12px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+    .rule-text { font-size: 14px; color: var(--white-dim); margin-top: 8px; line-height: 1.65; }
+
+    .address-row { display: flex; gap: 12px; align-items: stretch; margin-top: 18px; flex-wrap: wrap; }
+    .address-value {
+      flex: 1 1 320px; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 14px; color: var(--white); background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); padding: 14px 16px; overflow-x: auto; white-space: nowrap;
+    }
+    .address-row .btn-secondary { padding: 14px 26px; flex: 0 0 auto; }
+
+    .provider-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .provider-btn {
+      flex: 1 1 180px; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      color: var(--white-dim); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+      letter-spacing: 0.08em; padding: 16px 18px; cursor: pointer; transition: all 0.25s ease;
+    }
+    .provider-btn:hover { border-color: var(--gold-dim); color: var(--white); }
+    .provider-btn.active { border-color: var(--gold); color: var(--gold); background: var(--gold-subtle); }
+
+    .provider-panel { display: none; margin-top: 24px; }
+    .provider-panel.active { display: block; }
+
+    .walkthrough { list-style: none; counter-reset: wt; margin-top: 18px; }
+    .walkthrough li {
+      counter-increment: wt; position: relative; padding-left: 34px;
+      font-size: 14px; color: var(--white-dim); line-height: 1.7; margin-bottom: 14px;
+    }
+    .walkthrough li::before {
+      content: counter(wt); position: absolute; left: 0; top: 1px;
+      width: 22px; height: 22px; border: 1px solid var(--gold-subtle); color: var(--gold);
+      font-size: 11px; display: flex; align-items: center; justify-content: center;
+    }
+    .walkthrough strong { color: var(--white); font-weight: 500; }
+
+    .code-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 30px;
+      letter-spacing: 0.18em; color: var(--gold); margin-top: 6px;
+    }
+
+    .indicator { display: flex; gap: 14px; align-items: flex-start; margin-top: 20px; padding: 20px 24px; border: 1px solid var(--border); background: var(--navy-mid); }
+    .indicator-dot { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; background: var(--white-faint); }
+    .indicator.waiting .indicator-dot { background: var(--pill-amber); animation: pulseDot 1.8s ease-in-out infinite; }
+    .indicator.received .indicator-dot { background: var(--gold); }
+    .indicator.stalled .indicator-dot { background: var(--pill-red); }
+    .indicator-text { font-size: 14px; color: var(--white-dim); line-height: 1.7; }
+    .indicator-text strong { display: block; color: var(--white); font-weight: 500; margin-bottom: 4px; }
+    @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+    .download-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
+    .setup-foot { margin-top: 64px; font-size: 13px; color: var(--white-faint); line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+  <nav id="nav" class="solid">
+    <a href="/" class="nav-logo" aria-label="VOYAIGE home">
+      <img src="/assets/logo-mark.png" alt="" aria-hidden="true" width="42" height="35" style="display:block;">
+      <span class="nav-wordmark">VOYAIGE</span>
+    </a>
+    <div class="nav-right">
+      <!-- /account is NOT deployed — it reads the Stripe billing portal.
+           Restore it with the checkout half; a dead nav link on the one page a
+           user reaches mid-setup is the worst place to put one. -->
+    </div>
+  </nav>
+
+  <section class="setup">
+    <div class="container setup-wrap">
+
+      <p class="eyebrow">Setup</p>
+      <h1 class="display setup-title">Finish this on your computer.</h1>
+      <p class="setup-sub">
+        Mail rules live in your provider's settings, not in their phone app — Gmail's iOS app
+        cannot create one at all. So this takes a browser, and about ninety seconds.
+      </p>
+
+      <div id="banner" class="banner"></div>
+
+      <!-- ── Step 1. The rules, in plain English, BEFORE anything is offered.
+           Nothing lands on your device: a mail filter is an object in your own
+           account. But an XML file feels like an install, and the first five
+           minutes are governed by feeling — so the rules are described before the
+           download exists on the page. ────────────────────────────────────── -->
+      <div class="step">
+        <p class="step-num">Step 1</p>
+        <h2 class="step-head">What the rules do.</h2>
+        <p class="step-body">
+          Seven rules, and this is all of them. Each one forwards a copy of matching mail to
+          your VoyAIge address and leaves the original in your inbox, untouched.
+          <strong>Nothing else is read, and nothing is installed anywhere.</strong>
+        </p>
+        <p class="step-body">
+          <strong>They work on mail as it arrives.</strong> A Gmail rule never reaches back
+          through mail you already have, so your existing inbox stays exactly as it is and
+          this starts counting from the day you switch it on. If something already sitting in
+          there matters &mdash; a flight next month, a bill due &mdash; forward it across by
+          hand once and it will be picked up like any other.
+        </p>
+        <ul class="rules" id="rules"></ul>
+        <p class="step-body">
+          Start with one. You can add the others later, and you can delete any of them from
+          your own settings at any time without telling us.
+        </p>
+      </div>
+
+      <!-- ── Step 2. The address. ─────────────────────────────────────────── -->
+      <div class="step">
+        <p class="step-num">Step 2</p>
+        <h2 class="step-head">Your forwarding address.</h2>
+        <p class="step-body">
+          This address belongs to your account and nobody else's. Copy it — every provider
+          below asks for it.
+        </p>
+        <div class="address-row">
+          <div class="address-value" id="alias-address">Loading…</div>
+          <button class="btn-secondary" id="copy-address" type="button">Copy</button>
+        </div>
+      </div>
+
+      <!-- ── Step 3. Provider. ────────────────────────────────────────────── -->
+      <div class="step">
+        <p class="step-num">Step 3</p>
+        <h2 class="step-head">Where your mail lives.</h2>
+        <div class="provider-row" role="tablist">
+          <button class="provider-btn active" type="button" data-provider="gmail">Gmail</button>
+          <button class="provider-btn" type="button" data-provider="icloud">iCloud Mail</button>
+          <button class="provider-btn" type="button" data-provider="outlook">Outlook / Microsoft 365</button>
+        </div>
+
+        <!-- Gmail — the full flow. -->
+        <div class="provider-panel active" id="panel-gmail">
+          <ol class="walkthrough">
+            <li>Open <strong>Gmail on a computer</strong> → Settings (the gear) → See all settings → <strong>Forwarding and POP/IMAP</strong>.</li>
+            <li>Click <strong>Add a forwarding address</strong> and paste the address from Step 2.</li>
+            <li>Google sends a confirmation code to that address. It arrives here, not in your inbox — <strong>we read it out and show it to you below</strong>.</li>
+            <li>Paste the code back into Gmail and click <strong>Verify</strong>. Leave the "Disable forwarding" option selected — the rules do the forwarding, not the global setting.</li>
+            <li>Come back here and download the rule file, then in Gmail go to <strong>Filters and Blocked Addresses</strong> → <strong>Import filters</strong>.</li>
+          </ol>
+
+          <div class="notice">
+            <strong>Why we show you the code instead of just clicking the link.</strong>
+            Google's mail also carries a one-click confirmation link, and following it from our
+            side would finish this in one hop. We do not: confirming a change to your Google
+            account is an action your hand never took. It never acts on you, only for you.
+          </div>
+
+          <!-- The code relay. -->
+          <div class="step" style="margin-top:36px;">
+            <p class="step-num">Confirmation code</p>
+            <div id="code-state">
+              <p class="step-body">Waiting for Google's confirmation email…</p>
+            </div>
+          </div>
+
+          <!-- The download. Offered only after the address is confirmed. -->
+          <div class="step" style="margin-top:36px;">
+            <p class="step-num">The rule file</p>
+            <h3 class="step-head">Download and import.</h3>
+            <p class="step-body">
+              Gmail will accept a rule pointing at an unconfirmed address and then forward
+              nothing at all, so this stays closed until the code above has arrived.
+            </p>
+            <div class="download-row" id="download-row"></div>
+            <p class="step-body" id="download-note"></p>
+          </div>
+        </div>
+
+        <!-- iCloud — the fallback, not a build. -->
+        <div class="provider-panel" id="panel-icloud">
+          <div class="notice">
+            <strong>Apple only allows this from a browser, and only as a single rule.</strong>
+            iCloud Mail has no filter import and no per-rule forwarding on iOS. So iCloud gets
+            the simple version: forward the mail you want us to see, by hand or with one rule,
+            to the address in Step 2. We would rather say that plainly than build a flow that
+            half works.
+          </div>
+          <ol class="walkthrough">
+            <li>Open <strong>icloud.com/mail in a browser</strong> on a computer.</li>
+            <li>Click the settings icon → <strong>Preferences</strong> → <strong>Rules</strong> → Add a Rule.</li>
+            <li>Set the condition you want — a sender, or a word in the subject — and choose <strong>Forward to</strong>.</li>
+            <li>Paste the address from Step 2 and save.</li>
+            <li>Or skip all of that: forward individual emails to the address by hand. Everything on this page works the same way for mail you send yourself.</li>
+          </ol>
+        </div>
+
+        <!-- Outlook / Microsoft 365 — the silent block, named. -->
+        <div class="provider-panel" id="panel-outlook">
+          <div class="notice notice-warn">
+            <strong>Read this before you start.</strong>
+            If your mail is a work or school Microsoft 365 account, your organisation very
+            likely blocks forwarding to outside addresses at the tenant level. When it does,
+            Outlook still lets you create the rule, still shows it as enabled, and silently
+            forwards nothing — there is no error and no warning anywhere.
+            <br><br>
+            That is a setting only an administrator can change (the anti-spam outbound policy).
+            If the indicator below stays dark after you have made the rule, this is almost
+            certainly why — <strong>it is not your rule, and it is not us</strong>.
+            A personal outlook.com account has no such block.
+          </div>
+          <ol class="walkthrough">
+            <li>Open <strong>Outlook on the web</strong> → Settings → Mail → <strong>Rules</strong>.</li>
+            <li>Add a rule, set the condition — subject contains, or a sender — and choose <strong>Forward to</strong>.</li>
+            <li>Paste the address from Step 2 and save.</li>
+            <li>Send yourself a test message that matches the rule and watch the indicator below.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- ── Step 4. The live indicator. Correctness, not polish. ─────────── -->
+      <div class="step">
+        <p class="step-num">Step 4</p>
+        <h2 class="step-head">Has anything arrived?</h2>
+        <p class="step-body">
+          This updates on its own. Send yourself a message that matches your rule if you would
+          like to see it move.
+        </p>
+        <div class="indicator waiting" id="indicator">
+          <span class="indicator-dot"></span>
+          <span class="indicator-text"><strong>Checking…</strong>One moment.</span>
+        </div>
+      </div>
+
+      <p class="setup-foot">
+        You can undo all of this from your own mail settings, without asking us. Deleting your
+        VoyAIge account destroys everything on this page along with it.
+      </p>
+
+    </div>
+  </section>
+
+  <script type="module">
+    import '/js/setup-forwarding.js';
+  </script>
+
+</body>
+</html>
