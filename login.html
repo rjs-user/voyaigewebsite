@@ -66,12 +66,12 @@
 
   <script type="module">
     import { supabase } from '/js/supabase-client.js';
-    import { safeReturnTo } from '/js/auth-guard.js';
+    import { safeReturnTo, POST_AUTH_DEFAULT } from '/js/auth-guard.js';
     import '/js/nav-scroll.js';
     import '/js/auth-atmosphere.js';
 
     const params = new URLSearchParams(location.search);
-    const returnTo = safeReturnTo(params.get('return_to'), '/account');
+    const returnTo = safeReturnTo(params.get('return_to'), POST_AUTH_DEFAULT);
     const banner = document.getElementById('banner');
 
     function setBanner(msg, kind) { banner.className = `banner show banner-${kind}`; banner.textContent = msg; }
@@ -118,7 +118,7 @@
 
     // Carry return_to into the reset flow.
     document.getElementById('forgot-link').href =
-      `/forgot-password${returnTo !== '/account' ? `?return_to=${encodeURIComponent(returnTo)}` : ''}`;
+      `/forgot-password${returnTo !== POST_AUTH_DEFAULT ? `?return_to=${encodeURIComponent(returnTo)}` : ''}`;
   </script>
 
 </body>

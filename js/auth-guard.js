@@ -51,7 +51,29 @@ export async function fetchUserRow(userId) {
 }
 
 /** Validate the return_to param so we only ever redirect to same-origin paths. */
-export function safeReturnTo(raw, fallback = '/account') {
+/**
+ * Where a signed-in user goes when nothing else asked for a destination.
+ *
+ * ⚠ This used to point at the account page, which is NOT DEPLOYED — it reads
+ * the Stripe billing portal and ships with the checkout half. A user who
+ * opened /login
+ * directly (rather than being bounced there by `requireAuth`) signed in
+ * successfully and landed on the 404. Reported 2026-09-09, immediately after
+ * the signed-in surface went live: the sign-in WORKED and looked broken, which
+ * is the same failure shape as the missing module import an hour earlier —
+ * a page that renders while the thing behind it is absent.
+ *
+ * Points at the setup page because that is the only signed-in destination that
+ * currently exists. **Point it back at the account page in the same change that
+ * deploys it** — see web/deploy.sh's FILES manifest.
+ *
+ * (Deliberately no quoted path literal in this comment: deploy.sh's navigation
+ * check matches on the SHAPE of a value, so it cannot tell code from prose and
+ * a quoted path here reads as a real destination.)
+ */
+export const POST_AUTH_DEFAULT = '/setup-forwarding.html';
+
+export function safeReturnTo(raw, fallback = POST_AUTH_DEFAULT) {
   if (!raw) return fallback;
   try {
     const decoded = decodeURIComponent(raw);
